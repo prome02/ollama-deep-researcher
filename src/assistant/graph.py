@@ -12,10 +12,51 @@ from assistant.utils import deduplicate_and_format_sources, tavily_search, forma
 from assistant.state import SummaryState, SummaryStateInput, SummaryStateOutput
 from assistant.prompts import query_writer_instructions, summarizer_instructions, reflection_instructions
 
+import logging
+from datetime import datetime
+import os
+import sys
+import atexit
+# 把每次web_research內的search_results 內容存到程式啟動時的日誌檔案(UTF8)，
+# 這檔案是一個全域變數
+# 日誌檔案的檔名由日期時間產生，檔案內容為每次web_research的search_results內容
+from logging.handlers import RotatingFileHandler
+import datetime
+
+global logger
+def init_logger(log_name, log_file='log_file.log', max_bytes=1024*1024, backup_count=5):
+    global logger
+    if logger is None:  # 只在第一次初始化
+        logger = logging.getLogger(log_name)
+        logger.setLevel(logging.INFO)
+
+        if not logger.handlers:  # 確保不重複添加處理器
+            file_handler = logging.FileHandler(log_file, 'w', encoding='utf-8')
+            formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+            file_handler.setFormatter(formatter)
+            logger.addHandler(file_handler)
+
+    return logger
+
+
+def close_logger():
+    global logger
+    if logger is not None:
+        for handler in logger.handlers[:]:  # 複製處理器列表，避免迭代時修改
+            handler.close()
+            logger.removeHandler(handler)
+        logger = None  # 清除 logger
+
+
+# atexit.register(close_logger)
+
+
 # Nodes
 def generate_query(state: SummaryState, config: RunnableConfig):
     """ Generate a query for web search """
-
+    
+    # init_logger("now")
+    
     # Format the prompt
     query_writer_instructions_formatted = query_writer_instructions.format(research_topic=state.research_topic)
 
@@ -24,7 +65,10 @@ def generate_query(state: SummaryState, config: RunnableConfig):
     llm_json_mode = ChatOllama(base_url=configurable.ollama_base_url, model=configurable.local_llm, temperature=0, format="json")
     result = llm_json_mode.invoke(
         [SystemMessage(content=query_writer_instructions_formatted),
-        HumanMessage(content=f"Generate a query for web search:")]
+        HumanMessage(content="""
+                     Generate a query for web search:
+                     format: { query : XXXX }
+                     """)]
     )
     query = json.loads(result.content)
 
@@ -57,6 +101,10 @@ def web_research(state: SummaryState, config: RunnableConfig):
     else:
         raise ValueError(f"Unsupported search API: {configurable.search_api}")
 
+    # Log the search_results to the log file
+    # logger.info(search_results)
+    
+    
     return {"sources_gathered": [format_sources(search_results)], "research_loop_count": state.research_loop_count + 1, "web_research_results": [search_str]}
 
 def summarize_sources(state: SummaryState, config: RunnableConfig):
@@ -124,13 +172,27 @@ def reflect_on_summary(state: SummaryState, config: RunnableConfig):
     # Update search query with follow-up query
     return {"search_query": follow_up_query['follow_up_query']}
 
-def finalize_summary(state: SummaryState):
+def finalize_summary(state: SummaryState, config: RunnableConfig):
     """ Finalize the summary """
 
     # Format all accumulated sources into a single bulleted list
     all_sources = "\n".join(source for source in state.sources_gathered)
     state.running_summary = f"## Summary\n\n{state.running_summary}\n\n ### Sources:\n{all_sources}"
-    return {"running_summary": state.running_summary}
+    
+    configurable = Configuration.from_runnable_config(config)
+    llm_json_mode = ChatOllama(base_url=configurable.ollama_base_url, model=configurable.local_llm, temperature=0, format="json")
+    summary_content="\n".join(state.web_research_results)
+    summary_content += "\n" + "依據以上內容,寫一篇大約可分成4段的4000字的繁體中文文章，適合用在youtube旁白。"
+
+    result = llm_json_mode.invoke(
+        [SystemMessage(content=f"你是一位有經驗的youtuber，正在分析一個有關{state.research_topic}的內容。"),
+        HumanMessage(content=summary_content)]
+    )
+    
+    # logger.info(state.running_summary)
+    # close_logger()
+    
+    return {"running_summary": state.running_summary, "article": result.content}
 
 def route_research(state: SummaryState, config: RunnableConfig) -> Literal["finalize_summary", "web_research"]:
     """ Route the research based on the follow-up query """
