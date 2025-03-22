@@ -140,20 +140,24 @@ def finalize_summary(state: SummaryState, config: RunnableConfig):
     )
     
     try:
-        res = llm_json_mode.invoke(
-        [      HumanMessage(content="依照以下內容, 建立一個與之相關的檔案名稱的主檔名(確認是檔案名稱可用的字元):"+ state.research_topic)]
+        res = ChatOllama(base_url=configurable.ollama_base_url, model=configurable.local_llm, temperature=0.1).invoke(
+        [SystemMessage(content=f"請提供一個檔案名稱，以便保存文章。只回答檔案名稱, 不回答其他任何內容。"),
+         HumanMessage(content="依照以下內容, 建立一個與之相關的檔案名稱的主檔名(確認是檔案名稱可用的字元):"+ state.research_topic)]
         )
         
         
         # now = datetime.now().strftime("%Y%m%d_%H%M%S")
         # filename = f"summary_{now}.txt"
         print(f"files={res.content}")
-        filename = res.content + ".txt"
+        filename = "./content/" + res.content
+        result_json = json.loads(result.content)
+        state.article = result_json.get("article", "無法生成文章")
+        
         with open(filename, "w", encoding="utf-8") as f:
             for item in state.web_research_results:
                 f.write(f"{item}\n\n")  # Write each item to the file, followed by a newline character (\n) to separate item)
-        result_json = json.loads(result.content)
-        state.article = result_json.get("article", "無法生成文章")
+            f.write(state.article + "\n")
+        
     except (json.JSONDecodeError, TypeError):
         state.article = "生成文章時發生錯誤，可能是 LLM 輸出格式不正確"
 
