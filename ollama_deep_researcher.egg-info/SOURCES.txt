@@ -10,4 +10,6 @@ src/assistant/configuration.py
 src/assistant/graph.py
 src/assistant/prompts.py
 src/assistant/state.py
+src/assistant/test_graph.py
+src/assistant/test_logger.py
 src/assistant/utils.py

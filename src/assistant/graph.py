@@ -130,7 +130,7 @@ def finalize_summary(state: SummaryState, config: RunnableConfig):
     summary_content = "\n".join(state.web_research_results)
     
     summary_content += (
-        "\n" + "依據以上內容，生成一篇大約可分成4段的4000字繁體中文文章，適合用於 YouTube 旁白。"
+        "\n" + "依據以上內容，生成一篇大約可分成4段的繁體中文文章，適合用於 YouTube 旁白。文章撰寫過程應該避免太多次重複相同訊息或描述。"
         "請以 JSON 格式返回，結構如下：{ 'article': '你的文章內容' }"
     )
     
@@ -141,14 +141,14 @@ def finalize_summary(state: SummaryState, config: RunnableConfig):
     
     try:
         res = ChatOllama(base_url=configurable.ollama_base_url, model=configurable.local_llm, temperature=0.1).invoke(
-        [SystemMessage(content=f"請提供一個檔案名稱，以便保存文章。只回答檔案名稱, 不回答其他任何內容。"),
+        [SystemMessage(content="請提供一個文件(.txt)檔案名稱，以便保存文章。只回答檔案名稱, 不回答其他任何內容。"),
          HumanMessage(content="依照以下內容, 建立一個與之相關的檔案名稱的主檔名(確認是檔案名稱可用的字元):"+ state.research_topic)]
         )
         
         
         # now = datetime.now().strftime("%Y%m%d_%H%M%S")
         # filename = f"summary_{now}.txt"
-        print(f"files={res.content}")
+        print("files="+res.content)
         filename = "./content/" + res.content
         result_json = json.loads(result.content)
         state.article = result_json.get("article", "無法生成文章")
@@ -156,6 +156,8 @@ def finalize_summary(state: SummaryState, config: RunnableConfig):
         with open(filename, "w", encoding="utf-8") as f:
             for item in state.web_research_results:
                 f.write(f"{item}\n\n")  # Write each item to the file, followed by a newline character (\n) to separate item)
+                
+            f.write("### article：\n\n")
             f.write(state.article + "\n")
         
     except (json.JSONDecodeError, TypeError):
