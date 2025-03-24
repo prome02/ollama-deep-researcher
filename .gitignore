@@ -1,3 +1,4 @@
 .env
 content
 .venv
+.langgraph_api
