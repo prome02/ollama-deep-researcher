@@ -149,7 +149,7 @@ def finalize_summary(state: SummaryState, config: RunnableConfig):
         # now = datetime.now().strftime("%Y%m%d_%H%M%S")
         # filename = f"summary_{now}.txt"
         print("files="+res.content)
-        filename = "./content/" + res.content
+        filename =  "./content/"+ res.content
         result_json = json.loads(result.content)
         state.article = result_json.get("article", "無法生成文章")
         
