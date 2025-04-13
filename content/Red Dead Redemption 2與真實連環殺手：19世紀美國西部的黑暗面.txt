@@ -1,0 +1,138 @@
+我先搜尋相關的媒體資源。讓我為您撰寫一個10分鐘的YouTube劇本，主題為《Red Dead Redemption 2與真實連環殺手：19世紀美國西部的黑暗面》
+
+開場畫面：
+[遊戲畫面：Red Dead Redemption 2的遼闊風景]
+旁白：「在這片廣闊的西部荒野中，每個人都在追尋自己的命運...」
+
+第一段：遊戲與現實的連結（約2分鐘）
+[展示遊戲中Edmund Lowry Jr.的場景]
+參考資料：https://www.youtube.com/watch?v=C2hM548tr6U (遊戲場景)
+- 介紹RDR2的背景設定
+- Edmund Lowry Jr.的角色描述
+- 提及遊戲中的連環殺手情節
+鉤子：「但你知道嗎？這個角色其實是基於一個真實存在的19世紀連環殺手...」
+
+第二段：Stephen Dee Richards的生平（約3分鐘）
+[展示歷史照片與文獻]
+參考資料：Life and confession of Stephen Dee Richards (1879)
+https://www.loc.gov/item/20000607/
+- 出生背景與早期生活
+- 西進尋夢的經歷
+- 詳細描述犯罪過程
+鉤子：「但為什麼一個農場男孩會變成令人聞風喪膽的殺手？」
+
+第三段：時代背景分析（約3分鐘）
+[展示19世紀美國西部的歷史照片]
+- 分析19世紀西部社會特點
+- 討論Richards「自衛」說法
+- 從心理學與社會學角度解析
+建議使用當時的報紙報導和法庭記錄作為視覺素材
+
+第四段：結論（約2分鐘）
+[混合使用遊戲畫面和歷史照片]
+- 強調暴力永遠不可原諒
+- 探討這段歷史對現代的啟示
+- 以對底層人物的同情作結
+
+建議使用的視覺素材：
+1. RDR2遊戲畫面：
+- Edmund Lowry Jr.的任務場景
+- 遊戲中的犯罪現場
+視頻參考：https://www.youtube.com/watch?v=vSsADBHAfiY
+
+2. 歷史資料：
+- 1879年Stephen Dee Richards的懺悔錄封面
+- 當時的報紙報導
+- 法庭記錄文件
+資料來源：Library of Congress
+
+3. 配樂建議：
+- 開場：RDR2原聲帶的氛圍音樂
+- 轉場：19世紀民謠改編
+- 結尾：帶有憂傷感的配樂
+
+特別注意事項：
+1. 保持敘事的流暢性
+2. 適當使用懸念
+3. 在描述暴力事件時注意尺度
+4. 強調歷史教訓和人性反思
+5. 確保影片風格既有深度又能吸引觀眾
+
+這個劇本試圖在遊戲與現實、娛樂與教育之間取得平衡，既能吸引玩家，又能傳遞歷史知識和人文思考。
+
+
+我會依序為每個段落提供旁白腳本和DALL-E圖片創作提示詞。
+
+開場（15秒）：
+旁白：「在19世紀的美國西部，每個人都在追尋自己的命運。但在這片蠻荒之地，有些靈魂迷失在了黑暗中...這是一個關於遊戲與現實交織的故事，更是一個關於人性深淵的探索。」
+
+DALL-E提示：
+```
+A cinematic view of the American West at dusk, rolling plains with distant mountains, a single rider's silhouette against an orange sky, realistic oil painting style, dramatic lighting, 1870s period accurate
+```
+
+第一段（2分鐘）- 遊戲與現實的連結
+旁白：
+「Red Dead Redemption 2中的Valentine鎮，藏著一個令人不寒而慄的秘密。當玩家在遊戲中發現第一具被肢解的屍體時，他們還不知道自己即將面對什麼。Edmund Lowry Jr.，這個衣著考究、舉止優雅的紳士，背後隱藏著令人毛骨悚然的真相。
+
+在他的地下室裡，牆上貼滿了失蹤人口的報導，架上擺放著被害者的遺骸。這個角色的設定，來源於一個真實存在的19世紀連環殺手 - Stephen Dee Richards，綽號「內布拉斯加惡魔」。
+
+遊戲製作人深入研究了這段歷史，將Richards的故事重新演繹，成為了這個令人難忘的支線任務。從外表到行為模式，Edmund Lowry Jr.都完美還原了那個令19世紀中西部聞風喪膽的殺手。」
+
+DALL-E提示：
+```
+A Victorian-era basement laboratory with eerie lighting, newspaper clippings on wooden walls, antique medical instruments on shelves, 1870s period accurate, oil painting style, dramatic shadows, gothic horror atmosphere
+```
+
+第二段（3分鐘）- Richards的生平
+旁白：
+「1856年，Stephen Dee Richards出生在西維吉尼亞的一個貧困農家。童年顛沛流離，從西維吉尼亞到俄亥俄，最後定居在一個克瓦克教徒的村莊。生活的艱辛在他心中種下了痛苦的種子。
+
+1876年，20歲的Richards決定西進，追尋許多年輕人的淘金夢。他在愛荷華州一家精神病院找到工作，日復一日地埋葬死者。據他後來confession，正是在這裡，他開始對死亡變得麻木。
+
+短短兩年間，他在內布拉斯加和愛荷華州犯下至少9起謀殺案。最駭人聽聞的是Harlson家庭慘案，一位母親和她的三個幼童...被他...」（語氣漸趨沉重）
+
+DALL-E提示：
+```
+A young man in 1870s clothing standing before a weathered mental asylum, dark stormy sky, Gothic Victorian architecture, muted colors, realistic oil painting style, grim atmosphere
+```
+
+第三段（3分鐘）- 時代背景分析
+旁白：
+「19世紀70年代的美國西部，是一個充滿暴力與機遇的時代。法律的觸角還未能延伸到每個角落，人們往往需要用自己的方式維護正義。
+
+在他的懺悔錄中，Richards聲稱部分謀殺是出於自衛。他說：'Mary Harlson知道得太多了...'這種扭曲的邏輯反映了當時社會的殘酷現實。
+
+心理學家認為，Richards的行為模式展現了典型的社會邊緣人特徵：童年的貧困、社會的排斥、暴力的內化...這些都在他的靈魂上留下了無法磨滅的傷痕。」
+
+DALL-E提示：
+```
+A split composition showing 1870s frontier town street life, one half showing wealthy citizens, other half showing poverty and struggle, realistic historical style, muted colors, dramatic lighting emphasizing the social divide
+```
+
+第四段（2分鐘）- 結論
+旁白：
+「無論是遊戲中的Edmund Lowry Jr.，還是現實中的Stephen Dee Richards，他們的故事都警示著我們：暴力永遠不是解決問題的答案。
+
+然而，當我們回望這段歷史，我們不僅看到了惡魔的面孔，也看到了時代的倒影。在那個動盪的年代，多少靈魂迷失在了西部的荒野中？
+
+也許這就是為什麼近150年後的今天，這個故事依然觸動著我們的心靈。因為在某種程度上，這不僅是一個關於犯罪的故事，更是一曲關於人性的輓歌...」
+
+DALL-E提示：
+```
+A symbolic diptych of justice and tragedy, one side showing a frontier courthouse, other side showing a lonely grave on prairie at sunset, 1870s period accurate, oil painting style, emotional and atmospheric
+```
+
+建議背景音樂：
+- 開場：低沉的小提琴聲
+- 第一段：RDR2的背景音樂
+- 第二段：壓抑的鋼琴曲
+- 第三段：美國民謠風格的配樂
+- 第四段：憂傷的西部民謠
+
+注意事項：
+1. 旁白語氣要隨內容調整
+2. 描述暴力場景時要適度含蓄
+3. 要在敘事性和歷史真實性之間取得平衡
+4. 配樂要襯托情緒但不能搶走旁白的重心
+5. 圖片轉場要流暢自然
