@@ -27,29 +27,41 @@ def allowed_file(filename):
 
 @app.route('/save_mp3', methods=['POST'])
 def save_mp3():
-    """Handle the upload of an MP3 file, save it to the server, and return its details.
+    """Handle the TTS request, generate MP3, and save it to the server."""
+    data = request.get_json()
+    jobj = data.get("jobj")
+    if not jobj:
+        return jsonify({"error": "未提供 jobj"}), 400
 
-    Returns:
-    -------
-    Response
-        A JSON response containing the status, saved file path, and file size, or an error message.
-    """
-    if 'file' not in request.files:
-        return jsonify({"error": "未提供文件"}), 400
-    
-    file = request.files['file']
-    if file.filename == '':
-        return jsonify({"error": "空文件名"}), 400
-    
-    # 安全文件名處理
-    filename = os.path.join(UPLOAD_FOLDER, secure_filename(file.filename))
-    file.save(filename)
-    
-    return jsonify({
-        "status": "success",
-        "saved_path": filename,
-        "file_size": os.path.getsize(filename)
-    })
+    try:
+        # 使用 OpenAI TTS API 生成 MP3
+        tts_url = "https://api.openai.com/v1/audio/speech"
+        api_key = os.getenv("OPENAI_API_KEY")
+        if not api_key:
+            return jsonify({"error": "找不到 OPENAI_API_KEY，請確認 .env 檔"}), 500
+
+        headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json"
+        }
+        tts_response = requests.post(tts_url, headers=headers, json=jobj)
+        tts_response.raise_for_status()
+
+        # 保存 MP3 文件
+        filename = os.path.join(UPLOAD_FOLDER, "output.mp3")
+        with open(filename, "wb") as f:
+            f.write(tts_response.content)
+
+        return jsonify({
+            "status": "success",
+            "saved_path": filename,
+            "file_size": os.path.getsize(filename)
+        })
+
+    except requests.exceptions.RequestException as e:
+        return jsonify({"error": f"TTS 請求失敗: {str(e)}"}), 500
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
