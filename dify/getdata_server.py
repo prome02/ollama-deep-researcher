@@ -1,8 +1,5 @@
-"""This script sets up a Flask server that listens for POST requests on various endpoints.
-接收dify的json数据，保存为文件 (dify:優化小說內容流程).
-"""  # noqa: D205
+"""This script sets up a Flask server that listens for POST requests on specific endpoints."""  # noqa: D205
 import os
-
 import requests
 from flask import Flask, jsonify, request
 from werkzeug.utils import secure_filename
@@ -13,23 +10,19 @@ from io import BytesIO
 
 app = Flask(__name__)
 
-# 設定上傳目錄
-UPLOAD_FOLDER = './saved_mp3'
-IMAGE_UPLOAD_FOLDER = './static/images'  # 圖片上傳目錄
-GENERAL_UPLOAD_FOLDER = './uploads'  # 通用圖片上傳目錄
-ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png', 'gif'}
-
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-os.makedirs(IMAGE_UPLOAD_FOLDER, exist_ok=True)
-os.makedirs(GENERAL_UPLOAD_FOLDER, exist_ok=True)
-
-app.config['UPLOAD_FOLDER'] = GENERAL_UPLOAD_FOLDER
-
+# 從 .env 文件中載入配置
 load_dotenv()
 
-def allowed_file(filename):
-    """檢查文件是否為允許的圖片格式."""
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+# 設定上傳目錄
+SAVE_MP3 = os.getenv("SAVE_MP3", "./saved_mp3")
+os.makedirs(SAVE_MP3, exist_ok=True)
+
+def prompt_transform(prompt):
+    """將提示轉換為安全的文件名."""
+    basename = prompt
+    if len(basename) > 50:
+        basename = basename[:50]
+    return secure_filename(basename)
 
 def generate_and_save_images(prompt, num_images=1):
     """生成圖片並保存到指定目錄."""
@@ -40,18 +33,10 @@ def generate_and_save_images(prompt, num_images=1):
     if not api_key:
         raise ValueError("找不到 GEMINI_API_KEY，請確認 .env 檔")
 
-    # 建立資料夾（如果不存在）
     os.makedirs(save_dir, exist_ok=True)
+    basename = prompt_transform(prompt)
 
-    basename = prompt
-    if len(basename) > 50:
-        basename = basename[:50]
-    basename = secure_filename(basename)
-
-    # 初始化 API 客戶端
     client = Client(api_key=api_key)
-
-    # 生成圖片
     response = client.models.generate_images(
         model="imagen-3.0-generate-002",
         prompt=prompt,
@@ -77,7 +62,6 @@ def save_mp3():
         return jsonify({"error": "未提供 jobj"}), 400
 
     try:
-        # 使用 OpenAI TTS API 生成 MP3
         tts_url = "https://api.openai.com/v1/audio/speech"
         api_key = os.getenv("OPENAI_API_KEY")
         if not api_key:
@@ -90,8 +74,8 @@ def save_mp3():
         tts_response = requests.post(tts_url, headers=headers, json=jobj)
         tts_response.raise_for_status()
 
-        # 保存 MP3 文件
-        filename = os.path.join(UPLOAD_FOLDER, "output.mp3")
+        basename = prompt_transform(jobj.get("input"))
+        filename = os.path.join(SAVE_MP3, f"{basename}.mp3")
         with open(filename, "wb") as f:
             f.write(tts_response.content)
 
@@ -105,97 +89,6 @@ def save_mp3():
         return jsonify({"error": f"TTS 請求失敗: {str(e)}"}), 500
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
-@app.route('/upload', methods=['POST'])
-def upload_file():
-    """Handle the upload of a file via JSON data and save it to the server.
-
-    Returns:
-    -------
-    Response
-        A JSON response containing a success message and the saved filename, 
-        or an error message in case of failure.
-    """
-    try:
-        jobj = request.get_json()
-        filename = jobj.get('filename')
-        # 如果文件已存在，為文件名添加數字後綴
-        if filename:
-            i = 1
-            while os.path.exists(filename):
-                base, ext = os.path.splitext(filename)
-                filename = f"{base}_{i}{ext}"
-                i += 1
-        data = jobj.get('data')
-        
-        if not filename or not data:
-            return jsonify({'error': 'Missing filename or data'}), 400
-        
-        with open(filename, 'w', encoding='utf-8') as f:
-            f.write(data)
-        
-        return jsonify({'message': 'File saved successfully', 'filename': filename}), 200
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/download_image', methods=['POST'])
-def download_image():
-    """Download an image from a given URL and save it to the server.
-
-    Returns:
-    -------
-    Response
-        A JSON response containing the status, saved file path, and file size, 
-        or an error message in case of failure.
-    """
-    data = request.json
-    url = data.get('url')
-    
-    if not url:
-        return jsonify({"error": "未提供圖片 URL"}), 400
-
-    try:
-        filename = secure_filename(url.split('/')[-1])
-        if not allowed_file(filename):
-            return jsonify({"error": "不支援的圖片格式"}), 400
-
-        response = requests.get(url, stream=True)
-        response.raise_for_status()
-
-        save_path = os.path.join(IMAGE_UPLOAD_FOLDER, filename)
-        with open(save_path, 'wb') as f:
-            for chunk in response.iter_content(8192):
-                f.write(chunk)
-
-        return jsonify({
-            "status": "success",
-            "saved_path": save_path,
-            "file_size": os.path.getsize(save_path)
-        })
-
-    except requests.exceptions.RequestException as e:
-        return jsonify({"error": f"圖片下載失敗: {str(e)}"}), 500
-
-@app.route('/upload-image', methods=['POST'])
-def upload_image():
-    """Handle the upload of an image file and save it to the server.
-
-    Returns:
-    -------
-    Response
-        A JSON response containing a success message and the saved file path, 
-        or an error message in case of failure.
-    """
-    if 'image' not in request.files:
-        return jsonify({'error': 'No image file provided'}), 400
-    
-    file = request.files['image']
-    
-    # 保存圖片到磁碟
-    file_path = os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(file.filename))
-    file.save(file_path)
-    
-    return jsonify({'message': 'Image uploaded successfully', 'file_path': file_path})
 
 @app.route('/generate-and-save-images', methods=['POST'])
 def generate_and_save_images_route():

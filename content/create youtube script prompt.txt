@@ -10,49 +10,45 @@
 文章最後要加上資料來源。 可附加關聯的媒體連結，例如：圖片、影像、聲音等。
 
 ////優化後
+<format>是我最後要輸出的資料格式。
+以我指定的[語言]撰寫面對一般成年人聽眾的，至少10 分鐘的 YouTube 旁白，根據前面的討論，資料搜尋順序以英文為主、繁體中文為輔、簡體中文次之。
+最終輸出json物件包含以下段落結構<structure>：
+<structure>
+主題背景（埋下鉤子、懸念）
 
-以英文(en)、繁體中文(zh)撰寫 面對一般成年人聽眾的至少10 分鐘的 YouTube 劇本與旁白，根據前面的討論，加上額外英文為主、中文為輔的資料搜尋。以 JSON 輸出，包含以下段落結構：
-
-主題背景（埋下鉤子）
-
-事件詳述：關鍵人物、技術、裝置、時間地點等資訊（持續埋鉤子）
+事件詳述：關鍵人物、技術、裝置、時間地點等資訊（內含懸念, 並鼓勵觀眾留言發表意見）
 
 觀點反思或辯證：包含矛盾、邏輯漏洞、不同立場
 
 結論：整合觀點、判斷可信度、提供延伸話題或總結
+</structure>
 
-加入資料來源與可選媒體連結（如圖片、影片、音檔）。
-
-json物件格式舉例說明("content"內的元素的"Narration"內容不宜太長，可以使"speak_instructions"與"prompt"的描述更精確細緻)：
-
+format的補充說明：
+1. 加入資料來源與可選媒體連結（如圖片、影片、音檔）。可加入"resource"屬性。
+2. "content"內的元素的"Narration"內容不宜太長，才能讓"speak_instructions"與"prompt"的描述更精確細緻。
+3."prompt"生成參考imagen3的提示詞指南(https://ai.google.dev/gemini-api/docs/imagen-prompt-guide?hl=zh-tw)。並且要在與我討論過整體圖片風格之後才生成<format>格式資料。
+<format>
 {
-  "title":{
-    "en":"英文文章標題",
-    "zh":"繁體中文文章標題"
-  },
-  "introduction":{
-    "en":"英文youtube簡介",
-    "zh":"繁體中文youtube簡介"
-  },
-
+  "language":"en",
+  "title":"文章標題",
+  "introduction":"youtube簡介",
   "music":"整體配樂的AI生成音樂提示詞",
   "content": [
     {
-      "caption": {
-        "en":"英文段落標題",
-        "zh":"繁體中文段落標題"
-      },
+      "caption": "段落標題",
       "description": "段落描述或時間標記",
-      "Narration": {
-        "en":"英文的旁白",
-        "zh":"en的繁體中文旁白"
-      },
+      "Narration": "旁白",
       "speak_instructions":"text-to-speech提示詞，帶入情感標記",
       "prompt":"AI 生成圖片的提示詞",
 	    "music_prompt":"AI 生成音樂的提示詞，非必要"
     },
     ...
   ],
-  "resource": ["資料來源1","資料來源2"],
-  "note": "繁體中文的 其他注意事項"
+  "resource": ["資料來源1",
+        "資料來源2",
+        ...
+        ],
+  "note": "其他注意事項, 非必要。"
 }
+</format>
+所有屬性內容使用的語言與'language"屬性有關。

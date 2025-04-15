@@ -72,5 +72,5 @@ def split_json_by_language(file_path):
     print(f"輸出完成！檔案已儲存於資料夾：{output_dir}")
 
 # 使用範例
-file_path = r"d:\downloadProj\ollama-deep-researcher\content\【震撼揭秘】2025年吉薩金字塔地下巨大結構發現.json"
+file_path = r"""d:\downloadProj\ollama-deep-researcher\content\【震撼揭秘】2025年吉薩金字塔地下巨大結構發現.json"""
 split_json_by_language(file_path)
