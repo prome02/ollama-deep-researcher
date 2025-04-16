@@ -190,6 +190,9 @@ def upload_json():
         for item in data.get("content", []):
             narration = item.get("Narration", "")
             speak_instructions = item.get("speak_instructions", "")
+            prompt = item.get("prompt", "")  # 取得 'prompt' 屬性
+
+            # 呼叫 /save_mp3
             tts_payload = {
                 "model": "gpt-4o-mini-tts",
                 "voice": "alloy",
@@ -198,10 +201,15 @@ def upload_json():
             if speak_instructions:
                 tts_payload["instructions"] = speak_instructions
 
-            # Call /save_mp3 route
             logger.info(f"Calling /save_mp3 for narration: {narration}")
-            response = call_save_mp3(tts_payload)
-            results.append(response)
+            tts_response = call_save_mp3(tts_payload)
+            results.append({"save_mp3": tts_response})
+
+            # 呼叫 /generate-and-save-images
+            if prompt:
+                logger.info(f"Calling /generate-and-save-images for prompt: {prompt}")
+                image_response = call_generate_and_save_images(prompt)
+                results[-1]["generate_and_save_images"] = image_response
 
         logger.info("JSON file processed successfully")
         return jsonify({"status": "success", "results": results}), 200
@@ -212,6 +220,18 @@ def upload_json():
     except Exception as e:
         logger.error(f"Unexpected error: {str(e)}")
         return jsonify({"error": str(e)}), 500
+
+
+def call_generate_and_save_images(prompt):
+    """Call the /generate-and-save-images route with the given prompt."""
+    try:
+        headers = {"Content-Type": "application/json"}
+        payload = {"prompt": prompt}
+        response = requests.post("http://localhost:9125/generate-and-save-images", json=payload, headers=headers)
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        return {"error": f"Failed to call /generate-and-save-images: {str(e)}"}
 
 def validate_format(data):
     """Validate if the JSON matches the required <format>."""
