@@ -74,6 +74,7 @@ def save_mp3():
     logger.info("Received request to /save_mp3")
     data = request.get_json()
     jobj = data.get("jobj")
+    save_dir = data.get("save_dir", SAVE_MP3)
     if not jobj:
         logger.warning("No jobj provided in the request")
         return jsonify({"error": "未提供 jobj"}), 400
@@ -81,7 +82,7 @@ def save_mp3():
     try:
         # 檢查檔案是否已存在
         basename = prompt_transform(jobj.get("input"))
-        filename = os.path.join(SAVE_MP3, f"{basename}.mp3")
+        filename = os.path.join(save_dir, f"{basename}.mp3")
         if os.path.exists(filename):
             logger.info(f"MP3 file already exists at {filename}, skipping generation")
             return jsonify({
@@ -107,6 +108,7 @@ def save_mp3():
         tts_response.raise_for_status()
 
         # 保存 MP3 檔案
+        os.makedirs(save_dir, exist_ok=True)
         with open(filename, "wb") as f:
             f.write(tts_response.content)
 
@@ -131,11 +133,11 @@ def generate_and_save_images_route():
         data = request.get_json()
         prompt = data.get('prompt')
         num_images = 1  # 固定為 1
+        save_dir = data.get("save_dir", os.getenv("SAVE_IMAGES_DIR"))
 
         if not prompt:
             return jsonify({'error': '缺少 prompt 參數'}), 400
 
-        save_dir = os.getenv("SAVE_IMAGES_DIR")
         if not save_dir:
             raise ValueError("找不到 SAVE_IMAGES_DIR，請確認 .env 檔")
         os.makedirs(save_dir, exist_ok=True)
@@ -185,14 +187,35 @@ def upload_json():
             logger.warning("Invalid JSON format")
             return jsonify({"error": "Invalid JSON format"}), 400
 
+        # 從 .env 獲取初始資料夾位置
+        init_dir = os.getenv("INIT_DIR")
+        if not init_dir:
+            raise ValueError("找不到 INIT_DIR，請確認 .env 檔")
+        os.makedirs(init_dir, exist_ok=True)
+
+        # 根據 JSON 文件的主檔名創建資料夾
+        json_filename = secure_filename(file.filename.rsplit('.', 1)[0])  # 去掉副檔名
+        da_dir = os.path.join(init_dir, json_filename)
+        os.makedirs(da_dir, exist_ok=True)
+
         # Process content array
         results = []
         for item in data.get("content", []):
-            narration = item.get("Narration", "")
-            speak_instructions = item.get("speak_instructions", "")
-            prompt = item.get("prompt", "")  # 取得 'prompt' 屬性
+            # 確保 caption 屬性存在且有效
+            caption = item.get("caption")
+            if not caption:
+                logger.error("Caption is missing or invalid in one of the content items")
+                return jsonify({"error": "Caption is missing or invalid"}), 400
+
+            caption = secure_filename(caption)  # 確保名稱安全
+            db_dir = os.path.join(da_dir, caption)
+            os.makedirs(db_dir, exist_ok=True)
 
             # 呼叫 /save_mp3
+            narration = item.get("Narration", "")
+            speak_instructions = item.get("speak_instructions", "")
+            prompt = item.get("prompt", "")
+
             tts_payload = {
                 "model": "gpt-4o-mini-tts",
                 "voice": "alloy",
@@ -202,13 +225,13 @@ def upload_json():
                 tts_payload["instructions"] = speak_instructions
 
             logger.info(f"Calling /save_mp3 for narration: {narration}")
-            tts_response = call_save_mp3(tts_payload)
+            tts_response = call_save_mp3(tts_payload, db_dir)
             results.append({"save_mp3": tts_response})
 
             # 呼叫 /generate-and-save-images
             if prompt:
                 logger.info(f"Calling /generate-and-save-images for prompt: {prompt}")
-                image_response = call_generate_and_save_images(prompt)
+                image_response = call_generate_and_save_images(prompt, db_dir)
                 results[-1]["generate_and_save_images"] = image_response
 
         logger.info("JSON file processed successfully")
@@ -222,16 +245,17 @@ def upload_json():
         return jsonify({"error": str(e)}), 500
 
 
-def call_generate_and_save_images(prompt):
-    """Call the /generate-and-save-images route with the given prompt."""
+def call_generate_and_save_images(prompt, save_dir):
+    """Call the /generate-and-save-images route with the given prompt and save directory."""
     try:
         headers = {"Content-Type": "application/json"}
-        payload = {"prompt": prompt}
+        payload = {"prompt": prompt, "save_dir": save_dir}
         response = requests.post("http://localhost:9125/generate-and-save-images", json=payload, headers=headers)
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
         return {"error": f"Failed to call /generate-and-save-images: {str(e)}"}
+
 
 def validate_format(data):
     """Validate if the JSON matches the required <format>."""
@@ -248,11 +272,11 @@ def validate_format(data):
 
     return True
 
-def call_save_mp3(payload):
-    """Call the /save_mp3 route with the generated payload."""
+def call_save_mp3(payload, save_dir):
+    """Call the /save_mp3 route with the generated payload and save directory."""
     try:
         headers = {"Content-Type": "application/json"}
-        response = requests.post("http://localhost:9125/save_mp3", json={"jobj": payload}, headers=headers)
+        response = requests.post("http://localhost:9125/save_mp3", json={"jobj": payload, "save_dir": save_dir}, headers=headers)
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
