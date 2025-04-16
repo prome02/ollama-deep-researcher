@@ -118,7 +118,7 @@ def get_video_duration(video_path):
     except:
         return 0
 
-def process_folder_logic(folder_path, callback=None):
+# def process_folder_logic(folder_path, callback=None):
     if not folder_path or not os.path.exists(folder_path):
         return {'error': 'Invalid folder path'}, 400
 

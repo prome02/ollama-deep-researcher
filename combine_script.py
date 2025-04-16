@@ -4,14 +4,14 @@ import glob
 from pathlib import Path
 import ffmpeg
 import logging
+from tqdm import tqdm
 
 # Initialize logger
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def combine_media(folder_path):
-    """
-    Combines image and audio files within subfolders into one video file.
+    """Combines image and audio files within subfolders into one video file.
     
     This function:
     1. For each subfolder in the input folder that contains both PNG and MP3 files:
@@ -21,7 +21,7 @@ def combine_media(folder_path):
     
     Args:
         folder_path (str): Path to the folder containing subfolders with media files
-    """
+    """  # noqa: D401
     # Convert to absolute path
     folder_path = os.path.abspath(folder_path)
     original_dir = os.getcwd()
@@ -29,43 +29,50 @@ def combine_media(folder_path):
     results = []
 
     try:
-        for subdir in os.listdir('.'):
-            if not os.path.isdir(subdir):
-                continue
+        subdirs = [d for d in os.listdir('.') if os.path.isdir(d)]
+        total_subdirs = len(subdirs)
 
-            png_files = glob.glob(os.path.join(subdir, '*.png'))
-            mp3_files = glob.glob(os.path.join(subdir, '*.mp3'))
+        with tqdm(total=total_subdirs, desc="Processing folders", unit="folder") as pbar:
+            for subdir in subdirs:
+                if not os.path.isdir(subdir):
+                    pbar.update(1)
+                    continue
 
-            if png_files and mp3_files:
-                img_file = png_files[0]
-                aud_file = mp3_files[0]
-                output_file = os.path.join(subdir, 'output.mp4')
+                png_files = glob.glob(os.path.join(subdir, '*.png'))
+                mp3_files = glob.glob(os.path.join(subdir, '*.mp3'))
 
-                try:
-                    input_image = ffmpeg.input(img_file, loop=1)
-                    input_audio = ffmpeg.input(aud_file)
+                if png_files and mp3_files:
+                    img_file = png_files[0]
+                    aud_file = mp3_files[0]
+                    output_file = os.path.join(subdir, 'output.mp4')
 
-                    (
-                        ffmpeg.output(
-                            input_image,
-                            input_audio,
-                            output_file,
-                            vf="scale=1920:1046",
-                            vcodec='libx264',
-                            tune='stillimage',
-                            acodec='aac',
-                            audio_bitrate='192k',
-                            pix_fmt='yuv420p',
-                            shortest=None
+                    try:
+                        input_image = ffmpeg.input(img_file, loop=1)
+                        input_audio = ffmpeg.input(aud_file)
+
+                        (
+                            ffmpeg.output(
+                                input_image,
+                                input_audio,
+                                output_file,
+                                vf="scale=1920:1046",
+                                vcodec='libx264',
+                                tune='stillimage',
+                                acodec='aac',
+                                audio_bitrate='192k',
+                                pix_fmt='yuv420p',
+                                shortest=None
+                            )
+                            .overwrite_output()
+                            .run(quiet=True)
                         )
-                        .overwrite_output()
-                        .run(quiet=True)
-                    )
-                    logger.info(f"Created video for {subdir}")
-                    results.append({subdir: 'Video created successfully'})
-                except ffmpeg.Error as e:
-                    logger.error(f"Error processing {subdir}: {str(e)}")
-                    results.append({subdir: f"Error: {str(e)}"})
+                        logger.info(f"Created video for {subdir}")
+                        results.append({subdir: 'Video created successfully'})
+                    except ffmpeg.Error as e:
+                        logger.error(f"Error processing {subdir}: {str(e)}")
+                        results.append({subdir: f"Error: {str(e)}"})
+
+                pbar.update(1)
 
         subdirs = sorted(
             [d for d in os.listdir('.') if os.path.isdir(d) and os.path.exists(os.path.join(d, 'output.mp4'))],

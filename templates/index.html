@@ -18,10 +18,9 @@
                 </div>
                 <div class="mb-3">
                     <label for="folderPath" class="form-label mt-4">Select Folder:</label>
-                    <input type="text" id="folderPath" name="folderPath" class="form-control" placeholder="Enter folder path" required>
-                    <button type="button" id="selectFolderButton" class="btn btn-secondary mt-2" onclick="submitFolderPath()">Select Folder</button>
+                    <input type="text" id="folderPath" name="folderPath" class="form-control" required>
+                    <button type="button" id="selectFolderButton" class="btn btn-primary mt-2" onclick="submitFolderPath()">開始合併製作影片</button>
                 </div>
-                <button type="submit" class="btn btn-primary w-100">Upload and Process</button>
             </form>
         </div>
         <div id="result" class="mt-4"></div>
@@ -55,7 +54,7 @@
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ folder_path: folderPath })
+                body: JSON.stringify({ folderPath: folderPath }) // 修改為 folderPath
             })
             .then(response => response.json())
             .then(data => {
