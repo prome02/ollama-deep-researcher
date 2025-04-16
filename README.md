@@ -71,7 +71,7 @@ ollama pull deepseek-r1:8b
 ```
 
 3. Clone the repository:
-```bash
+```powershell
 git clone https://github.com/langchain-ai/ollama-deep-researcher.git
 cd ollama-deep-researcher
 ```
@@ -207,3 +207,21 @@ URL: https://smith.langchain.com/studio/?baseUrl=http://0.0.0.0:2024
 ...but the browser will not launch from the container.
 
 Instead, visit this link with the correct baseUrl IP address: [`https://smith.langchain.com/studio/thread?baseUrl=http://127.0.0.1:2024`](https://smith.langchain.com/studio/thread?baseUrl=http://127.0.0.1:2024)
+
+## New Feature: Folder-Based Video Creation
+
+### Overview
+This feature allows users to select a folder containing `.mp3` and `.png` files. The system will:
+1. Pair `.mp3` and `.png` files based on their modification times.
+2. Use `ffmpeg` to create individual video clips for each pair.
+3. Merge these clips into a single `.mp4` file with fade-in/out transitions.
+
+### How to Use
+1. Open the application in your browser.
+2. Enter the folder path in the "Select Folder" field.
+3. Submit the form.
+4. The processed video will be saved in the same folder as `final_output.mp4`.
+
+### Notes
+- Ensure the folder contains an equal number of `.mp3` and `.png` files.
+- Files are processed in the order of their modification times.

@@ -1,0 +1,12 @@
+{
+  "language": "en",
+  "title": "Test JSON",
+  "content": [
+    {
+      "caption": "test_caption",
+      "Narration": "This is a test narration.",
+      "speak_instructions": "Speak slowly.",
+      "prompt": "A beautiful sunset over the mountains"
+    }
+  ]
+}

@@ -1,8 +1,9 @@
 import logging
 import os
+import traceback  # 新增 traceback 模組
 
 from dotenv import load_dotenv
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, json, jsonify, render_template, request
 from utils import call_generate_and_save_images, call_save_mp3, validate_format
 from werkzeug.utils import secure_filename
 
@@ -27,14 +28,19 @@ logger = logging.getLogger(__name__)
 def save_mp3():
     """Handle the TTS request, generate MP3, and save it to the server."""
     logger.info("Received request to /save_mp3")
-    data = request.get_json()
-    jobj = data.get("jobj")
-    save_dir = data.get("save_dir")
-    if not jobj:
-        logger.warning("No jobj provided in the request")
-        return jsonify({"error": "未提供 jobj"}), 400
+    try:
+        data = request.get_json()
+        jobj = data.get("jobj")
+        save_dir = data.get("save_dir")
+        if not jobj:
+            logger.warning("No jobj provided in the request")
+            return jsonify({"error": "未提供 jobj"}), 400
 
-    return call_save_mp3(jobj, save_dir)
+        return call_save_mp3(jobj, save_dir)
+    except Exception as e:
+        tb = traceback.format_exc()
+        logger.error(f"Unexpected error: {str(e)}\n{tb}")
+        return jsonify({"error": str(e), "details": tb}), 500
 
 @app.route('/generate-and-save-images', methods=['POST'])
 def generate_and_save_images_route():
@@ -48,10 +54,10 @@ def generate_and_save_images_route():
             return jsonify({'error': '缺少 prompt 參數'}), 400
 
         return call_generate_and_save_images(prompt, save_dir)
-
     except Exception as e:
-        logger.error(f"Unexpected error: {str(e)}")
-        return jsonify({'error': str(e)}), 500
+        tb = traceback.format_exc()
+        logger.error(f"Unexpected error: {str(e)}\n{tb}")
+        return jsonify({"error": str(e), "details": tb}), 500
 
 @app.route('/upload-json', methods=['POST'])
 def upload_json():
@@ -113,22 +119,66 @@ def upload_json():
             if speak_instructions:
                 tts_payload["instructions"] = speak_instructions
 
-            logger.info(f"Calling /save_mp3 for narration: {narration}")
+            logger.info(f"Calling /save_mp3 for narration: {narration[:30]}")
             tts_response = call_save_mp3(tts_payload, db_dir)
             results.append({"save_mp3": tts_response})
 
             # 呼叫 /generate-and-save-images
             if prompt:
-                logger.info(f"Calling /generate-and-save-images for prompt: {prompt}")
+                logger.info(f"Calling /generate-and-save-images for prompt: {prompt[:30]}")
                 image_response = call_generate_and_save_images(prompt, db_dir)
                 results[-1]["generate_and_save_images"] = image_response
 
         logger.info("JSON file processed successfully")
         return jsonify({"status": "success", "results": results}), 200
+    except Exception as e:
+        tb = traceback.format_exc()
+        logger.error(f"Unexpected error: {str(e)}\n{tb}")
+        return jsonify({"error": str(e), "details": tb}), 500
+
+@app.route('/process-folder', methods=['POST'])
+def process_folder():
+    """Process the selected folder to create a video from .mp3 and .png files."""
+    try:
+        data = request.get_json()
+        folder_path = data.get('folderPath')
+
+        if not folder_path or not os.path.exists(folder_path):
+            return jsonify({'error': 'Invalid folder path'}), 400
+
+        # Collect .mp3 and .png files sorted by modification time
+        mp3_files = sorted(
+            [os.path.join(folder_path, f) for f in os.listdir(folder_path) if f.endswith('.mp3')],
+            key=os.path.getmtime
+        )
+        png_files = sorted(
+            [os.path.join(folder_path, f) for f in os.listdir(folder_path) if f.endswith('.png')],
+            key=os.path.getmtime
+        )
+
+        if len(mp3_files) != len(png_files):
+            return jsonify({'error': 'Mismatch between .mp3 and .png files'}), 400
+
+        # Create individual videos
+        video_files = []
+        for i, (mp3, png) in enumerate(zip(mp3_files, png_files)):
+            video_output = os.path.join(folder_path, f'video_{i}.mp4')
+            os.system(f"ffmpeg -loop 1 -i {png} -i {mp3} -c:v libx264 -tune stillimage -shortest -pix_fmt yuv420p {video_output}")
+            video_files.append(video_output)
+
+        # Merge videos with fade in/out
+        final_output = os.path.join(folder_path, 'final_output.mp4')
+        with open(os.path.join(folder_path, 'file_list.txt'), 'w') as f:
+            for video in video_files:
+                f.write(f"file '{video}'\n")
+
+        os.system(f"ffmpeg -f concat -safe 0 -i {os.path.join(folder_path, 'file_list.txt')} -c:v libx264 -pix_fmt yuv420p {final_output}")
+
+        return jsonify({'message': 'Video processing completed', 'output': final_output}), 200
 
     except Exception as e:
-        logger.error(f"Unexpected error: {str(e)}")
-        return jsonify({"error": str(e)}), 500
+        logger.error(f"Error processing folder: {str(e)}")
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/')
 def index():
