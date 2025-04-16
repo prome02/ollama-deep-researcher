@@ -5,3 +5,8 @@
 **/__pycache__/
 # 忽略所有 .pyc 文件（可選，但建議保留）
 *.pyc
+saved_mp3/*
+save_images/*
+
+server.log
+content/【震撼揭秘】2025年吉薩金字塔地下巨大結構發現/mp3 result.txt
