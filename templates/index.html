@@ -14,10 +14,12 @@
                 <div class="mb-3">
                     <label for="jsonFile" class="form-label">Upload JSON File:</label>
                     <input type="file" id="jsonFile" name="jsonFile" class="form-control" accept=".json" required>
+                    <button type="button" id="uploadJsonButton" class="btn btn-primary mt-2">Upload JSON</button>
                 </div>
                 <div class="mb-3">
-                    <label for="folderPath" class="form-label">Select Folder:</label>
+                    <label for="folderPath" class="form-label mt-4">Select Folder:</label>
                     <input type="text" id="folderPath" name="folderPath" class="form-control" placeholder="Enter folder path" required>
+                    <button type="button" id="selectFolderButton" class="btn btn-secondary mt-2" onclick="submitFolderPath()">Select Folder</button>
                 </div>
                 <button type="submit" class="btn btn-primary w-100">Upload and Process</button>
             </form>
@@ -45,6 +47,29 @@
                 resultDiv.innerHTML = `<div class="alert alert-danger"><p>Error: ${result.error}</p></div>`;
             }
         });
+
+        function submitFolderPath() {
+            const folderPath = document.getElementById('folderPath').value;
+            fetch('/process-folder', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ folder_path: folderPath })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(`Error: ${data.error}`);
+                } else {
+                    alert(`Success: ${data.message}`);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while processing the folder.');
+            });
+        }
     </script>
 </body>
 </html>

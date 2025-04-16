@@ -1,9 +1,12 @@
 import os
+import shutil
 from io import BytesIO
+
+import ffmpeg
+import requests
+from google.genai import Client, types
 from PIL import Image
 from werkzeug.utils import secure_filename
-from google.genai import Client, types
-import requests
 
 
 def call_save_mp3(payload, save_dir):
@@ -84,3 +87,136 @@ def validate_format(data):
             return False
 
     return True
+
+def generate_video(mp3_path, png_path, output_path):
+    """使用圖片與音訊產生單一影片（靜態背景 + 音樂）."""
+    try:
+        input_image = ffmpeg.input(png_path, loop=1)
+        input_audio = ffmpeg.input(mp3_path)
+
+        (
+            ffmpeg
+            .output(input_image, input_audio, output_path,
+                    vcodec='libx264',
+                    tune='stillimage',
+                    shortest=None,
+                    pix_fmt='yuv420p')
+            .run(overwrite_output=True, quiet=True)
+        )
+        return True
+    except ffmpeg.Error as e:
+        print(f"[ffmpeg error] {e.stderr.decode()}")
+        return False
+
+
+def get_video_duration(video_path):
+    """取得影片長度（秒）."""
+    try:
+        probe = ffmpeg.probe(video_path)
+        duration = float(probe['format']['duration'])
+        return duration
+    except:
+        return 0
+
+def process_folder_logic(folder_path, callback=None):
+    if not folder_path or not os.path.exists(folder_path):
+        return {'error': 'Invalid folder path'}, 400
+
+    subfolders = [
+        os.path.join(folder_path, name) for name in os.listdir(folder_path)
+        if os.path.isdir(os.path.join(folder_path, name))
+    ]
+    subfolders.sort(key=os.path.getctime)
+
+    video_files = []
+    durations = []
+    for idx, sub in enumerate(subfolders):
+        mp3_list = [f for f in os.listdir(sub) if f.endswith('.mp3')]
+        png_list = [f for f in os.listdir(sub) if f.endswith('.png')]
+
+        if len(mp3_list) != 1 or len(png_list) != 1:
+            print(f"Skipped: {sub} does not contain exactly one .mp3 and one .png")
+            continue
+
+        mp3_path = os.path.join(sub, mp3_list[0])
+        png_path = os.path.join(sub, png_list[0])
+        video_output = os.path.join(sub, 'video.mp4')
+
+        success = generate_video(mp3_path, png_path, video_output)
+        if success:
+            duration = get_video_duration(video_output)
+            if duration > 0:
+                video_files.append(video_output)
+                durations.append(duration)
+                if callback:
+                    callback(f"[{idx+1}/{len(subfolders)}] Created: {video_output}")
+            else:
+                print(f"Invalid duration for: {video_output}")
+        else:
+            print(f"Failed to generate video for: {sub}")
+
+    if len(video_files) < 2:
+        return {'error': 'At least two valid videos required for transition merge.'}, 400
+
+    try:
+        # 產生轉場影片
+        inputs = [ffmpeg.input(v) for v in video_files]
+        fade_duration = 1  # 1 秒淡入淡出
+
+        stream = inputs[0]
+        current_time = durations[0] - fade_duration
+
+        for i in range(1, len(inputs)):
+            stream = ffmpeg.filter([stream, inputs[i]], 'xfade',
+                                   transition='fade',
+                                   duration=fade_duration,
+                                   offset=current_time)
+            current_time += durations[i] - fade_duration
+
+        final_output = os.path.join(folder_path, 'final_output.mp4')
+        (
+            ffmpeg
+            .output(stream, final_output, vcodec='libx264', pix_fmt='yuv420p')
+            .run(overwrite_output=True, quiet=True)
+        )
+
+        if callback:
+            callback("✅ Final merge completed.")
+
+        return {'message': 'Video processing completed with transitions', 'output': final_output}, 200
+
+    except ffmpeg.Error as e:
+        return {'error': 'Failed to merge videos with transition', 'details': e.stderr.decode()}, 500
+
+def replace_png_files(batch_dir, target_base_dir):
+    """Iterate through .png files in batch_dir and replace matching files in target_base_dir subfolders."""
+    if not os.path.exists(batch_dir):
+        return {"error": "Batch directory does not exist"}
+
+    if not os.path.exists(target_base_dir):
+        return {"error": "Target base directory does not exist"}
+
+    # Iterate through .png files in batch_dir
+    for file_name in os.listdir(batch_dir):
+        if file_name.endswith('.png'):
+            batch_file_path = os.path.join(batch_dir, file_name)
+
+            # Search for matching files in target_base_dir subfolders
+            for root, _, files in os.walk(target_base_dir):
+                if file_name in files:
+                    target_file_path = os.path.join(root, file_name)
+
+                    # Replace the file
+                    try:
+                        shutil.copy2(batch_file_path, target_file_path)
+                        print(f"Replaced: {target_file_path}")
+                    except Exception as e:
+                        print(f"Failed to replace {target_file_path}: {e}")
+
+    return {"message": "Replacement process completed"}
+
+    
+if __name__ == "__main__":
+    batch_dir = "G:\\batch\\"
+    target_base_dir = "G:\\ai_generate\\The_Great_Underground_Discovery_Massive_Structures_Beneath_the_Giza_Pyramids\\"
+    # result = replace_png_files(batch_dir, target_base_dir)

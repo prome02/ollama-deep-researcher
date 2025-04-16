@@ -53,7 +53,7 @@ python -m venv .venv
 source .venv/bin/activate
 ```
 
-6. Launch the assistant with the LangGraph server:
+6. Launch the assistant:
 
 ```bash
 # Install uv package manager
@@ -85,40 +85,16 @@ python -m venv .venv
 .venv\Scripts\Activate.ps1
 ```
 
-6. Launch the assistant with the LangGraph server:
+6. Launch the assistant:
 
 ```powershell
 # Install dependencies
 pip install -e .
 pip install -U "langgraph-cli[inmem]"            
 
-# Start the LangGraph server
+# Start the assistant
 langgraph dev
 ```
-
-### Using the LangGraph Studio UI
-
-When you launch LangGraph server, you should see the following output and Studio will open in your browser:
-> Ready!
->
-> API: http://127.0.0.1:2024
->
-> Docs: http://127.0.0.1:2024/docs
->
-> LangGraph Studio Web UI: https://smith.langchain.com/studio/?baseUrl=http://127.0.0.1:2024
-
-Open `LangGraph Studio Web UI` via the URL in the output above.
-
-In the `configuration` tab:
-* Pick your web search tool (DuckDuckGo, Tavily, or Perplexity) (it will by default be `DuckDuckGo`) 
-* Set the name of your local LLM to use with Ollama (it will by default be `llama3.2`) 
-* You can set the depth of the research iterations (it will by default be `3`)
-
-<img width="1621" alt="Screenshot 2025-01-24 at 10 08 31 PM" src="https://github.com/user-attachments/assets/7cfd0e04-28fd-4cfa-aee5-9a556d74ab21" />
-
-Give the assistant a topic for research, and you can visualize its process!
-
-<img width="1621" alt="Screenshot 2025-01-24 at 10 08 22 PM" src="https://github.com/user-attachments/assets/4de6bd89-4f3b-424c-a9cb-70ebd3d45c5f" />
 
 ### Model Compatibility Note
 
@@ -135,7 +111,7 @@ If you [encounter JSON-related errors](https://github.com/langchain-ai/ollama-de
 
 ### Browser Compatibility Note
 
-When accessing the LangGraph Studio UI:
+When accessing the assistant:
 - Firefox is recommended for the best experience
 - Safari users may encounter security warnings due to mixed content (HTTPS/HTTP)
 - If you encounter issues, try:
@@ -153,27 +129,17 @@ Ollama Deep Researcher is inspired by [IterDRAG](https://arxiv.org/html/2410.043
 - It generates a new search query to address the knowledge gaps
 - The process repeats, with the summary being iteratively updated with new information from web search
 - It will repeat down the research rabbit hole
-- Runs for a configurable number of iterations (see `configuration` tab)
+- Runs for a configurable number of iterations
 
 ## Outputs
 
-The output of the graph is a markdown file containing the research summary, with citations to the sources used.
+The output is a markdown file containing the research summary, with citations to the sources used.
 
-All sources gathered during research are saved to the graph state.
-
-You can visualize them in the graph state, which is visible in LangGraph Studio:
-
-![Screenshot 2024-12-05 at 4 08 59 PM](https://github.com/user-attachments/assets/e8ac1c0b-9acb-4a75-8c15-4e677e92f6cb)
-
-The final summary is saved to the graph state as well:
-
-![Screenshot 2024-12-05 at 4 10 11 PM](https://github.com/user-attachments/assets/f6d997d5-9de5-495f-8556-7d3891f6bc96)
+All sources gathered during research are saved.
 
 ## Deployment Options
 
-There are [various ways](https://langchain-ai.github.io/langgraph/concepts/#deployment-options) to deploy this graph.
-
-See [Module 6](https://github.com/langchain-ai/langchain-academy/tree/main/module-6) of LangChain Academy for a detailed walkthrough of deployment options with LangGraph.
+There are [various ways](https://langchain-ai.github.io/langgraph/concepts/#deployment-options) to deploy this.
 
 ## TypeScript Implementation
 
@@ -182,7 +148,7 @@ https://github.com/PacoVK/ollama-deep-researcher-ts
 
 ## Running as a Docker container
 
-The included `Dockerfile` only runs LangChain Studio with ollama-deep-researcher as a service, but does not include Ollama as a dependant service. You must run Ollama separately and configure the `OLLAMA_BASE_URL` environment variable. Optionally you can also specify the Ollama model to use by providing the `OLLAMA_MODEL` environment variable.
+The included `Dockerfile` only runs the assistant as a service, but does not include Ollama as a dependant service. You must run Ollama separately and configure the `OLLAMA_BASE_URL` environment variable. Optionally you can also specify the Ollama model to use by providing the `OLLAMA_MODEL` environment variable.
 
 Clone the repo and build an image:
 ```

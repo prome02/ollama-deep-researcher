@@ -2,10 +2,16 @@ import logging
 import os
 import traceback  # 新增 traceback 模組
 
+from combine_script import combine_media
 from dotenv import load_dotenv
 from flask import Flask, json, jsonify, render_template, request
-from utils import call_generate_and_save_images, call_save_mp3, validate_format
 from werkzeug.utils import secure_filename
+
+from utils import (
+    call_generate_and_save_images,
+    call_save_mp3,
+    validate_format,
+)
 
 app = Flask(__name__)
 
@@ -142,40 +148,8 @@ def process_folder():
     try:
         data = request.get_json()
         folder_path = data.get('folderPath')
-
-        if not folder_path or not os.path.exists(folder_path):
-            return jsonify({'error': 'Invalid folder path'}), 400
-
-        # Collect .mp3 and .png files sorted by modification time
-        mp3_files = sorted(
-            [os.path.join(folder_path, f) for f in os.listdir(folder_path) if f.endswith('.mp3')],
-            key=os.path.getmtime
-        )
-        png_files = sorted(
-            [os.path.join(folder_path, f) for f in os.listdir(folder_path) if f.endswith('.png')],
-            key=os.path.getmtime
-        )
-
-        if len(mp3_files) != len(png_files):
-            return jsonify({'error': 'Mismatch between .mp3 and .png files'}), 400
-
-        # Create individual videos
-        video_files = []
-        for i, (mp3, png) in enumerate(zip(mp3_files, png_files)):
-            video_output = os.path.join(folder_path, f'video_{i}.mp4')
-            os.system(f"ffmpeg -loop 1 -i {png} -i {mp3} -c:v libx264 -tune stillimage -shortest -pix_fmt yuv420p {video_output}")
-            video_files.append(video_output)
-
-        # Merge videos with fade in/out
-        final_output = os.path.join(folder_path, 'final_output.mp4')
-        with open(os.path.join(folder_path, 'file_list.txt'), 'w') as f:
-            for video in video_files:
-                f.write(f"file '{video}'\n")
-
-        os.system(f"ffmpeg -f concat -safe 0 -i {os.path.join(folder_path, 'file_list.txt')} -c:v libx264 -pix_fmt yuv420p {final_output}")
-
-        return jsonify({'message': 'Video processing completed', 'output': final_output}), 200
-
+        result = combine_media(folder_path)
+        return jsonify({'status': 'success', 'message': 'Folder processed successfully', 'details': result}), 200
     except Exception as e:
         logger.error(f"Error processing folder: {str(e)}")
         return jsonify({'error': str(e)}), 500
