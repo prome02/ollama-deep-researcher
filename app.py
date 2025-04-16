@@ -1,11 +1,13 @@
 import logging
 import os
 import traceback  # 新增 traceback 模組
+import time
+from threading import Thread
+from flask import Flask, json, jsonify, render_template, request, session
+from werkzeug.utils import secure_filename
 
 from combine_script import combine_media
 from dotenv import load_dotenv
-from flask import Flask, json, jsonify, render_template, request
-from werkzeug.utils import secure_filename
 
 from utils import (
     call_generate_and_save_images,
@@ -29,6 +31,17 @@ logging.basicConfig(
     ]
 )
 logger = logging.getLogger(__name__)
+
+progress = {}  # 用於存儲進度狀態
+
+def update_progress(folder_path):
+    """模擬進度更新的後台任務"""
+    global progress
+    progress[folder_path] = 0
+    for i in range(1, 101):
+        time.sleep(0.1)  # 模擬耗時操作
+        progress[folder_path] = i
+    progress[folder_path] = 100
 
 @app.route('/save_mp3', methods=['POST'])
 def save_mp3():
@@ -148,11 +161,22 @@ def process_folder():
     try:
         data = request.get_json()
         folder_path = data.get('folderPath')
-        result = combine_media(folder_path)
-        return jsonify({'status': 'success', 'message': 'Folder processed successfully', 'details': result}), 200
+
+        # 啟動後台進程來處理文件夾
+        thread = Thread(target=update_progress, args=(folder_path,))
+        thread.start()
+
+        return jsonify({'status': 'success', 'message': 'Processing started'}), 200
     except Exception as e:
         logger.error(f"Error processing folder: {str(e)}")
         return jsonify({'error': str(e)}), 500
+
+@app.route('/progress/<folder_path>', methods=['GET'])
+def get_progress(folder_path):
+    """返回指定文件夾的進度狀態"""
+    global progress
+    current_progress = progress.get(folder_path, 0)
+    return jsonify({'progress': current_progress}), 200
 
 @app.route('/')
 def index():
