@@ -161,12 +161,16 @@ def process_folder():
     try:
         data = request.get_json()
         folder_path = data.get('folderPath')
+        generate_final_video = data.get('generateFinalVideo', False)  # Get the checkbox value
 
-        # 啟動後台進程來處理文件夾
+        # Log the checkbox value
+        logger.info(f"Generate final video: {generate_final_video}")
+
+        # Start background process to handle folder
         thread = Thread(target=update_progress, args=(folder_path,))
         thread.start()
 
-        return jsonify({'status': 'success', 'message': 'Processing started'}), 200
+        return jsonify({'status': 'success', 'message': 'Processing started', 'generateFinalVideo': generate_final_video}), 200
     except Exception as e:
         logger.error(f"Error processing folder: {str(e)}")
         return jsonify({'error': str(e)}), 500
@@ -177,6 +181,32 @@ def get_progress(folder_path):
     global progress
     current_progress = progress.get(folder_path, 0)
     return jsonify({'progress': current_progress}), 200
+
+@app.route('/save-text', methods=['POST'])
+def save_text():
+    """Handle request to save text data to a file."""
+    try:
+        # Parse JSON data from the request
+        data = request.get_json()
+        filename = data.get('filename')
+        content = data.get('data')
+
+        if not filename or not content:
+            return jsonify({'error': 'Missing filename or data'}), 400
+
+        # Secure the filename to prevent directory traversal attacks
+        safe_filename = secure_filename(filename)
+        safe_filename = os.path.join("./content/deep_research", safe_filename)
+
+        # Save the content to a file
+        with open(safe_filename, 'w', encoding='utf-8') as file:
+            file.write(content)
+
+        return jsonify({'status': 'success', 'message': f'File {safe_filename} saved successfully.'}), 200
+    except Exception as e:
+        tb = traceback.format_exc()
+        logger.error(f"Unexpected error: {str(e)}\n{tb}")
+        return jsonify({'error': str(e), 'details': tb}), 500
 
 @app.route('/')
 def index():

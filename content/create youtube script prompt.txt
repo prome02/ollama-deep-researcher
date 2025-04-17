@@ -12,7 +12,7 @@
 ////優化後
 <format>是我最後要輸出的資料格式。
 以我指定的[語言]撰寫面對一般成年人聽眾的，至少10 分鐘的 YouTube 旁白，根據前面的討論，資料搜尋順序以英文為主、繁體中文為輔、簡體中文次之。
-最終輸出json物件包含以下段落結構<structure>：
+最終輸出json物件包含以下要點<structure>，段落數量不限制：
 <structure>
 主題背景（埋下鉤子、懸念）
 
@@ -25,8 +25,10 @@
 
 format的補充說明：
 1. 加入資料來源與可選媒體連結（如圖片、影片、音檔）。可加入"resource"屬性。
-2. "content"內的元素的"Narration"內容不宜太長，才能讓"speak_instructions"與"prompt"的描述更精確細緻。
-3."prompt"生成參考imagen3的提示詞指南(https://ai.google.dev/gemini-api/docs/imagen-prompt-guide?hl=zh-tw)。並且要在與我討論過整體圖片風格之後才生成<format>格式資料。
+2. "content"內的元素的"Narration"最多100單詞，才能讓"speak_instructions"與"prompt"的描述更精確細緻。
+3. "speak_instructions"最多30個單詞。
+4."prompt"：對應Narration描述,生成參考imagen3的提示詞指南(https://ai.google.dev/gemini-api/docs/imagen-prompt-guide?hl=zh-tw)。提示詞輸出節省token使用。並且要在與我討論過整體圖片風格之後才生成<format>格式資料。
+
 <format>
 {
   "language":"en",
@@ -52,3 +54,5 @@ format的補充說明：
 }
 </format>
 所有屬性內容使用的語言與'language"屬性有關。
+
+若有不明確的，先提問，不要直接輸出結果。
