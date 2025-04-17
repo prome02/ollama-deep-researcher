@@ -1,14 +1,79 @@
+import glob
+import logging
 import os
 import subprocess
-import glob
 from pathlib import Path
+
 import ffmpeg
-import logging
 from tqdm import tqdm
 
 # Initialize logger
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+def merge_media_files(image_path: str, audio_path: str, output_path: str):
+    """Merges an image file and an audio file into a single MP4 video.
+
+    Args:
+        image_path (str): Path to the image file.
+        audio_path (str): Path to the audio file.
+        output_path (str): Path to save the output MP4 file.
+
+    Returns:
+        bool: True if the merge is successful, False otherwise.
+    """  # noqa: D401
+    try:
+        input_image = ffmpeg.input(image_path, loop=1)
+        input_audio = ffmpeg.input(audio_path)
+
+        (
+            ffmpeg.output(
+                input_image,
+                input_audio,
+                output_path,
+                vf="scale=1920:1046",
+                vcodec='libx264',
+                tune='stillimage',
+                acodec='aac',
+                audio_bitrate='192k',
+                pix_fmt='yuv420p',
+                shortest=None
+            )
+            .overwrite_output()
+            .run(quiet=True)
+        )
+        return True
+    except ffmpeg.Error as e:
+        logger.error(f"Error merging media files: {str(e)}")
+        return False
+
+def concatenate_video_files(video_paths: list, output_path: str):
+    """
+    Concatenates multiple MP4 video files into a single MP4 video.
+
+    Args:
+        video_paths (list): List of paths to MP4 video files to concatenate.
+        output_path (str): Path to save the concatenated MP4 file.
+
+    Returns:
+        bool: True if the concatenation is successful, False otherwise.
+    """  # noqa: D212
+    concat_list_path = 'concat_list.txt'
+    try:
+        with open(concat_list_path, 'w') as f:
+            for video_path in video_paths:
+                f.write(f"file '{video_path}'\n")
+
+        subprocess.run([
+            'ffmpeg', '-y', '-f', 'concat', '-safe', '0',
+            '-i', concat_list_path, '-c', 'copy', output_path
+        ], check=True)
+
+        os.remove(concat_list_path)
+        return True
+    except (subprocess.CalledProcessError, OSError) as e:
+        logger.error(f"Error concatenating video files: {e}")
+        return False
 
 def combine_media(folder_path):
     """Combines image and audio files within subfolders into one video file.
@@ -46,31 +111,11 @@ def combine_media(folder_path):
                     aud_file = mp3_files[0]
                     output_file = os.path.join(subdir, 'output.mp4')
 
-                    try:
-                        input_image = ffmpeg.input(img_file, loop=1)
-                        input_audio = ffmpeg.input(aud_file)
-
-                        (
-                            ffmpeg.output(
-                                input_image,
-                                input_audio,
-                                output_file,
-                                vf="scale=1920:1046",
-                                vcodec='libx264',
-                                tune='stillimage',
-                                acodec='aac',
-                                audio_bitrate='192k',
-                                pix_fmt='yuv420p',
-                                shortest=None
-                            )
-                            .overwrite_output()
-                            .run(quiet=True)
-                        )
+                    if merge_media_files(img_file, aud_file, output_file):
                         logger.info(f"Created video for {subdir}")
                         results.append({subdir: 'Video created successfully'})
-                    except ffmpeg.Error as e:
-                        logger.error(f"Error processing {subdir}: {str(e)}")
-                        results.append({subdir: f"Error: {str(e)}"})
+                    else:
+                        results.append({subdir: 'Error creating video'})
 
                 pbar.update(1)
 
@@ -84,28 +129,14 @@ def combine_media(folder_path):
             os.chdir(original_dir)
             return {"status": "No videos to concatenate"}
 
-        concat_list_path = os.path.join(folder_path, 'concat_list.txt')
-        with open(concat_list_path, 'w') as f:
-            for subdir in subdirs:
-                video_path = os.path.join(subdir, 'output.mp4')
-                f.write(f"file '{video_path}'\n")
+        video_paths = [os.path.join(subdir, 'output.mp4') for subdir in subdirs]
+        final_output = os.path.join(folder_path, 'output.mp4')
 
-        try:
-            final_output = os.path.join(folder_path, 'output.mp4')
-
-            subprocess.run([
-                'ffmpeg', '-y', '-f', 'concat', '-safe', '0',
-                '-i', concat_list_path, '-c', 'copy', final_output
-            ], check=True)
-
-            if os.path.exists(concat_list_path):
-                os.remove(concat_list_path)
-
+        if concatenate_video_files(video_paths, final_output):
             logger.info("Final video created successfully.")
             results.append({"final_output": "Video concatenated successfully"})
-        except subprocess.CalledProcessError as e:
-            logger.error(f"Error concatenating videos: {e}")
-            results.append({"final_output": f"Error: {e}"})
+        else:
+            results.append({"final_output": "Error concatenating videos"})
 
     finally:
         os.chdir(original_dir)

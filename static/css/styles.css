@@ -1,0 +1,39 @@
+body {
+    background-color: #f8f9fa;
+}
+
+.container {
+    padding-top: 5rem;
+}
+
+.text-center {
+    margin-bottom: 1.5rem;
+}
+
+.card {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+}
+
+.progress {
+    margin-top: 1.5rem;
+}
+
+.btn {
+    margin-top: 0.5rem;
+}
+
+.mb-3 {
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.row {
+    display: flex;
+}
+
+.col-md-6 {
+    flex: 0 0 50%;
+    max-width: 50%;
+}
