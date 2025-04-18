@@ -1,7 +1,7 @@
 精簡版
 ///
 
-以 <language> 撰寫面向一般成年人、長度約10分鐘的 YouTube 劇本與旁白。內容依以下 <structure> 結構撰寫，並以英文資料為主(>50%) > 繁中 > 簡中。最終以標準 JSON（<format>）輸出：
+以 <language> 撰寫面向一般成年人、長度約10分鐘的 YouTube 劇本與旁白。內容依以下 <structure> 結構撰寫(段落數量不限制)，若需要額外蒐集參考資料以英文資料為主(>50%) > 繁中 > 簡中。最終以標準 JSON（<format>）輸出：
 
 <structure>
 1. 主題背景：建立興趣、埋設懸念
@@ -9,10 +9,10 @@
 3. 觀點反思：提出邏輯疑點、衝突觀點與多元立場
 4. 結論總整：綜合討論、判斷可信度、補充延伸話題、收尾
 
-<format> 注意事項：
+<format>產生屬性時注意事項：
 - "Narration" 限 100 詞，便於生成精準 "speak_instructions"（≤30詞）
 - "prompt" 基於 Narration、符合 [Imagen3 圖片提示指南](https://ai.google.dev/gemini-api/docs/imagen-prompt-guide?hl=zh-tw)，風格需事先討論
-- "music_prompt"具備<說明>等項目：
+- "music_prompt" 基於 Narration，具備<說明>等項目：
 
 <說明>
 - 曲風/風格（如: cinematic ambient）
@@ -29,10 +29,11 @@
   "language":"en",
   "title":"文章標題",
   "introduction":"youtube簡介",
-  "music":"整體配樂的AI生成音樂提示詞",
+  "music":"整體配樂的AI生成音樂提示詞參考<說明>",
   "content": [
     {
       "caption": "段落標題",
+      "UUID": "兩碼順序碼 + 16碼的唯一識別碼",
       "description": "段落描述或時間標記",
       "Narration": "旁白",
       "speak_instructions":"text-to-speech提示詞，帶入情感標記",
