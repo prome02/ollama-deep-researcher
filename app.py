@@ -166,11 +166,15 @@ def process_folder():
         # Log the checkbox value
         logger.info(f"Generate final video: {generate_final_video}")
 
-        # Start background process to handle folder
-        thread = Thread(target=update_progress, args=(folder_path,))
-        thread.start()
+        result = combine_media(folder_path)
+        return jsonify({'status': 'success', 'message': 'Folder processed successfully', 'details': result, 
+        'generateFinalVideo': generate_final_video}), 200
 
-        return jsonify({'status': 'success', 'message': 'Processing started', 'generateFinalVideo': generate_final_video}), 200
+        # Start background process to handle folder
+        # thread = Thread(target=update_progress, args=(folder_path,))
+        # thread.start()
+
+        # return jsonify({'status': 'success', 'message': 'Processing started', 'generateFinalVideo': generate_final_video}), 200
     except Exception as e:
         logger.error(f"Error processing folder: {str(e)}")
         return jsonify({'error': str(e)}), 500

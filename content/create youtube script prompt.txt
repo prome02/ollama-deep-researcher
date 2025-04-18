@@ -1,33 +1,28 @@
-針對主題以繁體中文寫youtube節目的10分鐘劇本與旁白。
-搜尋資訊過程以英文資料為主, 中文資料為輔。
-最終輸出json物件。
+精簡版
+///
 
-文本內容至少四個段落，前面兩段可以埋下文章的"鉤子"，後兩段確定會回應所有"鉤子"；
-第一段先對主題進行背景介紹。
-第二段進行主題的主要描述，特別著重描述事件發生過程。包括與事件相關的人員名字與背景簡介、關聯技術、特殊裝置或物件、發生時間、地點等等。 第三段對第二段提出反思，或是邏輯漏洞、相異看法，進行觀點的發想或辯證。
-第四段收斂結果，對二三段的結果並陳，評估哪些觀點是比較值得信任的；對於不信任的觀點做出解釋。或許加上延伸話題，並總結文章作為結束。
+以 <language> 撰寫面向一般成年人、長度約10分鐘的 YouTube 劇本與旁白。內容依以下 <structure> 結構撰寫，並以英文資料為主(>50%) > 繁中 > 簡中。最終以標準 JSON（<format>）輸出：
 
-文章最後要加上資料來源。 可附加關聯的媒體連結，例如：圖片、影像、聲音等。
-
-////優化後
-<format>是我最後要輸出的資料格式。
-以我指定的[語言]撰寫面對一般成年人聽眾的，至少10 分鐘的 YouTube 旁白，根據前面的討論，資料搜尋順序以英文為主、繁體中文為輔、簡體中文次之。
-最終輸出json物件包含以下要點<structure>，段落數量不限制：
 <structure>
-主題背景（埋下鉤子、懸念）
+1. 主題背景：建立興趣、埋設懸念
+2. 事件詳述：說明人物、背景、技術、裝置、時間與地點；保留懸念並鼓勵留言
+3. 觀點反思：提出邏輯疑點、衝突觀點與多元立場
+4. 結論總整：綜合討論、判斷可信度、補充延伸話題、收尾
 
-事件詳述：關鍵人物、技術、裝置、時間地點等資訊（內含懸念, 並鼓勵觀眾留言發表意見）
+<format> 注意事項：
+- "Narration" 限 100 詞，便於生成精準 "speak_instructions"（≤30詞）
+- "prompt" 基於 Narration、符合 [Imagen3 圖片提示指南](https://ai.google.dev/gemini-api/docs/imagen-prompt-guide?hl=zh-tw)，風格需事先討論
+- "music_prompt"具備<說明>等項目：
 
-觀點反思或辯證：包含矛盾、邏輯漏洞、不同立場
+<說明>
+- 曲風/風格（如: cinematic ambient）
+- 音色元素（如: analog synth, cello）
+- 節奏設備（如: TR-808）
+- 氛圍形容詞（如: nostalgic, eerie）
+- 編曲品質（如: layered, rich texture）
+- 節奏速度（如: 90 BPM）
 
-結論：整合觀點、判斷可信度、提供延伸話題或總結
-</structure>
-
-format的補充說明：
-1. 加入資料來源與可選媒體連結（如圖片、影片、音檔）。可加入"resource"屬性。
-2. "content"內的元素的"Narration"最多100單詞，才能讓"speak_instructions"與"prompt"的描述更精確細緻。
-3. "speak_instructions"最多30個單詞。
-4."prompt"：對應Narration描述,生成參考imagen3的提示詞指南(https://ai.google.dev/gemini-api/docs/imagen-prompt-guide?hl=zh-tw)。提示詞輸出節省token使用。並且要在與我討論過整體圖片風格之後才生成<format>格式資料。
+最終輸出為 JSON 格式 <format>，包含 content、resource 與可選 note 欄。圖片與音樂風格未明確時請先詢問。
 
 <format>
 {
@@ -42,7 +37,7 @@ format的補充說明：
       "Narration": "旁白",
       "speak_instructions":"text-to-speech提示詞，帶入情感標記",
       "prompt":"AI 生成圖片的提示詞",
-	    "music_prompt":"AI 生成音樂的提示詞，非必要"
+	    "music_prompt":"AI 生成配樂的提示詞，非必要"
     },
     ...
   ],
@@ -53,6 +48,3 @@ format的補充說明：
   "note": "其他注意事項, 非必要。"
 }
 </format>
-所有屬性內容使用的語言與'language"屬性有關。
-
-若有不明確的，先提問，不要直接輸出結果。
