@@ -1,8 +1,8 @@
-import glob
+import glob  # noqa: D100
 import logging
 import os
 import subprocess
-from pathlib import Path
+import tempfile
 
 import ffmpeg
 from tqdm import tqdm
@@ -47,33 +47,55 @@ def merge_media_files(image_path: str, audio_path: str, output_path: str):
         logger.error(f"Error merging media files: {str(e)}")
         return False
 
-def concatenate_video_files(video_paths: list, output_path: str):
-    """
-    Concatenates multiple MP4 video files into a single MP4 video.
+def concatenate_video_files(video_paths: list, output_path: str, ext_setting: dict = None):  # noqa: D103
+    if ext_setting is None:
+        ext_setting = {}
 
-    Args:
-        video_paths (list): List of paths to MP4 video files to concatenate.
-        output_path (str): Path to save the concatenated MP4 file.
+    pause_duration = ext_setting.get("pause_duration", 0)
+    fade_duration = ext_setting.get("fade_duration", 0)
 
-    Returns:
-        bool: True if the concatenation is successful, False otherwise.
-    """  # noqa: D212
-    concat_list_path = 'concat_list.txt'
-    try:
-        with open(concat_list_path, 'w') as f:
-            for video_path in video_paths:
-                f.write(f"file '{video_path}'\n")
+    # 確保 pause_duration 足夠長，讓淡入與淡出都能完整顯示
+    if fade_duration > 0 and pause_duration < fade_duration * 2:
+        pause_duration = fade_duration * 2
 
-        subprocess.run([
-            'ffmpeg', '-y', '-f', 'concat', '-safe', '0',
-            '-i', concat_list_path, '-c', 'copy', output_path
-        ], check=True)
+    with tempfile.TemporaryDirectory() as tmpdir:
+        final_list = []
+        pause_path = None
 
-        os.remove(concat_list_path)
-        return True
-    except (subprocess.CalledProcessError, OSError) as e:
-        logger.error(f"Error concatenating video files: {e}")
-        return False
+        if pause_duration > 0:
+            # 建立黑畫面過場影片
+            pause_path = os.path.join(tmpdir, "pause.mp4")
+            filters = []
+            if fade_duration > 0:
+                filters.append(f"fade=t=in:st=0:d={fade_duration}")
+                filters.append(f"fade=t=out:st={pause_duration - fade_duration}:d={fade_duration}")
+            fade_filter = ",".join(filters)
+            ffmpeg_cmd = [
+                "ffmpeg", "-y",
+                "-f", "lavfi", "-i", "color=black:s=1920x1080:d=" + str(pause_duration),
+                "-vf", fade_filter if fade_filter else "null",
+                "-c:v", "libx264", "-t", str(pause_duration),
+                pause_path
+            ]
+            subprocess.run(ffmpeg_cmd, check=True)
+
+        # 重組影片清單，穿插 pause
+        for i, video in enumerate(video_paths):
+            final_list.append(f"file '{os.path.abspath(video)}'")
+            if i < len(video_paths) - 1 and pause_path:
+                final_list.append(f"file '{os.path.abspath(pause_path)}'")
+
+        list_txt_path = os.path.join(tmpdir, "list.txt")
+        with open(list_txt_path, "w") as f:
+            f.write("\n".join(final_list))
+
+        # 執行拼接
+        concat_cmd = [
+            "ffmpeg", "-y",
+            "-f", "concat", "-safe", "0", "-i", list_txt_path,
+            "-c", "copy", output_path
+        ]
+        subprocess.run(concat_cmd, check=True)
 
 def combine_media(folder_path, generate_final_video: bool = False):
     """Combines image and audio files within subfolders into one video file.
@@ -148,6 +170,36 @@ def combine_media(folder_path, generate_final_video: bool = False):
 
     return results
 
-# Example usage
+def generate_one_second_video(output_path: str, color: str = "black"):
+    """Generates a one-second-long MP4 video with a specified background color and silent audio.
+
+    Args:
+        output_path (str): Path to save the generated MP4 file.
+        color (str): Background color of the video (default is "black").
+
+    Returns:
+        bool: True if the video is generated successfully, False otherwise.
+    """  # noqa: D401
+    try:
+        subprocess.run([
+            'ffmpeg', '-y', '-f', 'lavfi', '-i', 'anullsrc=r=44100:cl=stereo', '-t', '1',
+            '-vf', f'color={color}:size=1920x1080:rate=30', '-pix_fmt', 'yuv420p', '-c:v', 'libx264', '-c:a', 'aac', output_path
+        ], check=True)
+        logger.info(f"One-second video with color '{color}' generated at {output_path}")
+        return True
+    except subprocess.CalledProcessError as e:
+        logger.error(f"Error generating one-second video: {e}")
+        return False
+
+
 if __name__ == "__main__":
-    combine_media(r"G:\ai_generate\2025_en")
+    concatenate_video_files(
+    ["test1.mp4", "test2.mp4"],
+    "output.mp4",
+    {
+        "pause_duration": 2,
+        "fade_duration": 1
+    }
+)
+
+
