@@ -166,7 +166,7 @@ def process_folder():
         # Log the checkbox value
         logger.info(f"Generate final video: {generate_final_video}")
 
-        result = combine_media(folder_path)
+        result = combine_media(folder_path, generate_final_video)
         return jsonify({'status': 'success', 'message': 'Folder processed successfully', 'details': result, 
         'generateFinalVideo': generate_final_video}), 200
 

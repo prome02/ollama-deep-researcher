@@ -75,17 +75,18 @@ def concatenate_video_files(video_paths: list, output_path: str):
         logger.error(f"Error concatenating video files: {e}")
         return False
 
-def combine_media(folder_path):
+def combine_media(folder_path, generate_final_video: bool = False):
     """Combines image and audio files within subfolders into one video file.
     
     This function:
     1. For each subfolder in the input folder that contains both PNG and MP3 files:
        - Combines the PNG and MP3 into an output.mp4
-    2. Concatenates all output.mp4 files from subfolders based on folder creation time
-    3. Creates a final output.mp4 in the root folder
+    2. Optionally concatenates all output.mp4 files from subfolders based on folder creation time
+    3. Creates a final output.mp4 in the root folder if generate_final_video is True
     
     Args:
         folder_path (str): Path to the folder containing subfolders with media files
+        generate_final_video (bool): Whether to generate the final concatenated video
     """  # noqa: D401
     # Convert to absolute path
     folder_path = os.path.abspath(folder_path)
@@ -118,6 +119,10 @@ def combine_media(folder_path):
                         results.append({subdir: 'Error creating video'})
 
                 pbar.update(1)
+
+        if not generate_final_video:
+            logger.info("Skipping final video generation as generate_final_video is False.")
+            return results
 
         subdirs = sorted(
             [d for d in os.listdir('.') if os.path.isdir(d) and os.path.exists(os.path.join(d, 'output.mp4'))],
