@@ -158,7 +158,7 @@ def upload_json():
         os.makedirs(init_dir, exist_ok=True)
 
         # 根據 JSON 文件的主檔名創建資料夾
-        json_filename = secure_filename(file.filename.rsplit('.', 1)[0])  # 去掉副檔名
+        json_filename = secure_filename(data.get("title"))
         da_dir = os.path.join(init_dir, json_filename)
         os.makedirs(da_dir, exist_ok=True)
 

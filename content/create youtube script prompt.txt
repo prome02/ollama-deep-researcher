@@ -1,6 +1,6 @@
 精簡版
 ///
-
+整理截至目前的討論。
 以 <language> 撰寫面向一般成年人、長度約10分鐘的 YouTube 劇本與旁白。內容依以下 <structure> 結構撰寫(段落數量不限制)，若需要額外蒐集參考資料以英文資料為主(>50%) > 繁中 > 簡中。最終以標準 JSON（<format>）輸出：
 
 <structure>
@@ -13,6 +13,7 @@
 - "Narration" 限 100 詞，便於生成精準 "speak_instructions"（≤10詞）。
 - "prompt" 基於 Narration、符合 [Imagen3 圖片提示指南](https://ai.google.dev/gemini-api/docs/imagen-prompt-guide?hl=zh-tw)，風格需事先討論
 - "music_prompt" 基於 Narration，具備<說明>等項目：
+- 檢查各段落的"Narration",移除不必要的重複資訊
 
 <說明>
 - 曲風/風格（如: cinematic ambient）
