@@ -10,7 +10,7 @@
 4. 結論總整：綜合討論、判斷可信度、補充延伸話題、收尾
 
 <format>產生屬性時注意事項：
-- "Narration" 限 100 詞，便於生成精準 "speak_instructions"（≤30詞）
+- "Narration" 限 100 詞，便於生成精準 "speak_instructions"（≤10詞）。
 - "prompt" 基於 Narration、符合 [Imagen3 圖片提示指南](https://ai.google.dev/gemini-api/docs/imagen-prompt-guide?hl=zh-tw)，風格需事先討論
 - "music_prompt" 基於 Narration，具備<說明>等項目：
 

@@ -1,17 +1,16 @@
 import logging
 import os
-import traceback  # 新增 traceback 模組
 import time
-from threading import Thread
+import traceback  # 新增 traceback 模組
+
+import requests
+from dotenv import load_dotenv
 from flask import Flask, json, jsonify, render_template, request, session
 from werkzeug.utils import secure_filename
 
 from combine_script import combine_media
-from dotenv import load_dotenv
-
 from utils import (
     call_generate_and_save_images,
-    call_save_mp3,
     validate_format,
 )
 
@@ -34,6 +33,16 @@ logger = logging.getLogger(__name__)
 
 progress = {}  # 用於存儲進度狀態
 
+SAVE_MP3 = os.getenv("SAVE_MP3", "./saved_mp3")
+os.makedirs(SAVE_MP3, exist_ok=True)
+
+def prompt_transform(prompt):
+    """將提示轉換為安全的文件名."""
+    basename = prompt
+    if len(basename) > 50:
+        basename = basename[:50]
+    return secure_filename(basename)
+
 def update_progress(folder_path):
     """模擬進度更新的後台任務"""
     global progress
@@ -47,19 +56,59 @@ def update_progress(folder_path):
 def save_mp3():
     """Handle the TTS request, generate MP3, and save it to the server."""
     logger.info("Received request to /save_mp3")
-    try:
-        data = request.get_json()
-        jobj = data.get("jobj")
-        save_dir = data.get("save_dir")
-        if not jobj:
-            logger.warning("No jobj provided in the request")
-            return jsonify({"error": "未提供 jobj"}), 400
+    data = request.get_json()
+    jobj = data.get("jobj")
+    save_dir = data.get("save_dir", SAVE_MP3)
+    if not jobj:
+        logger.warning("No jobj provided in the request")
+        return jsonify({"error": "未提供 jobj"}), 400
 
-        return call_save_mp3(jobj, save_dir)
+    try:
+        # 檢查檔案是否已存在
+        basename = prompt_transform(jobj.get("input"))
+        filename = os.path.join(save_dir, f"{basename}.mp3")
+        if os.path.exists(filename):
+            logger.info(f"MP3 file already exists at {filename}, skipping generation")
+            return jsonify({
+                "status": "success",
+                "message": "File already exists",
+                "saved_path": filename,
+                "file_size": os.path.getsize(filename)
+            }), 200
+
+        # 發送 TTS 請求
+        tts_url = "https://api.openai.com/v1/audio/speech"
+        api_key = os.getenv("OPENAI_API_KEY")
+        if not api_key:
+            logger.error("OPENAI_API_KEY not found in environment variables")
+            return jsonify({"error": "找不到 OPENAI_API_KEY，請確認 .env 檔"}), 500
+
+        headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json"
+        }
+        logger.info("Sending TTS request to OpenAI API")
+        tts_response = requests.post(tts_url, headers=headers, json=jobj)
+        tts_response.raise_for_status()
+
+        # 保存 MP3 檔案
+        os.makedirs(save_dir, exist_ok=True)
+        with open(filename, "wb") as f:
+            f.write(tts_response.content)
+
+        logger.info(f"MP3 file saved successfully at {filename}")
+        return jsonify({
+            "status": "success",
+            "saved_path": filename,
+            "file_size": os.path.getsize(filename)
+        }), 200
+
+    except requests.exceptions.RequestException as e:
+        logger.error(f"TTS request failed: {str(e)}")
+        return jsonify({"error": f"TTS 請求失敗: {str(e)}"}), 500
     except Exception as e:
-        tb = traceback.format_exc()
-        logger.error(f"Unexpected error: {str(e)}\n{tb}")
-        return jsonify({"error": str(e), "details": tb}), 500
+        logger.error(f"Unexpected error: {str(e)}")
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/generate-and-save-images', methods=['POST'])
 def generate_and_save_images_route():
@@ -113,7 +162,7 @@ def upload_json():
         da_dir = os.path.join(init_dir, json_filename)
         os.makedirs(da_dir, exist_ok=True)
 
-        # Process content array
+        # Extract relevant data from the Response objects before appending to results
         results = []
         for item in data.get("content", []):
             caption = item.get("caption")
@@ -125,24 +174,31 @@ def upload_json():
             db_dir = os.path.join(da_dir, caption)
             os.makedirs(db_dir, exist_ok=True)
 
-            # 呼叫 /save_mp3
+            # Call /save_mp3
             narration = item.get("Narration", "")
             speak_instructions = item.get("speak_instructions", "")
-            prompt = item.get("prompt", "")
+            voice_actor = item.get("voice_actor", "alloy")
 
             tts_payload = {
                 "model": "gpt-4o-mini-tts",
-                "voice": "alloy",
+                "voice": voice_actor,
                 "input": narration,
             }
             if speak_instructions:
                 tts_payload["instructions"] = speak_instructions
 
             logger.info(f"Calling /save_mp3 for narration: {narration[:30]}")
-            tts_response = call_save_mp3(tts_payload, db_dir)
-            results.append({"save_mp3": tts_response})
 
-            # 呼叫 /generate-and-save-images
+            headers = {"Content-Type": "application/json"}
+            tts_response = requests.post("http://localhost:9125/save_mp3", json={"jobj": tts_payload, "save_dir": db_dir}, headers=headers)
+            tts_response_data = {
+                "status_code": tts_response.status_code,
+                "response": tts_response.json() if tts_response.status_code == 200 else tts_response.text
+            }
+            results.append({"save_mp3": tts_response_data})
+
+            # Call /generate-and-save-images
+            prompt = item.get("prompt", "")
             if prompt:
                 logger.info(f"Calling /generate-and-save-images for prompt: {prompt[:30]}")
                 image_response = call_generate_and_save_images(prompt, db_dir)

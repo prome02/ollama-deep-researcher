@@ -6,7 +6,7 @@ if (!leftSection || !rightSection) {
     console.error('Left or right section not found. Ensure the HTML structure matches the CSS.');
 }
 
-document.getElementById('upload-json-form').addEventListener('submit', async (e) => {
+document.getElementById('uploadJsonButton').addEventListener('click', async (e) => {
     e.preventDefault();
     const formData = new FormData();
     const fileInput = document.getElementById('jsonFile');

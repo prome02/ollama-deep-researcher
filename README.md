@@ -1,71 +1,14 @@
 # Ollama Deep Researcher
 
-Ollama Deep Researcher is a fully local web research assistant that uses any LLM hosted by [Ollama](https://ollama.com/search). Give it a topic and it will generate a web search query, gather web search results (via [Tavily](https://www.tavily.com/) by default), summarize the results of web search, reflect on the summary to examine knowledge gaps, generate a new search query to address the gaps, search, and improve the summary for a user-defined number of cycles. It will provide the user a final markdown summary with all sources used.
-
-![research-rabbit](https://github.com/user-attachments/assets/4308ee9c-abf3-4abb-9d1e-83e7c2c3f187)
-
-Short summary:
-<video src="https://github.com/user-attachments/assets/02084902-f067-4658-9683-ff312cab7944" controls></video>
-
-## 📺 Video Tutorials
-
-See it in action or build it yourself? Check out these helpful video tutorials:
-- [Overview of Ollama Deep Researcher with R1](https://www.youtube.com/watch?v=sGUjmyfof4Q) - Load and test [DeepSeek R1](https://api-docs.deepseek.com/news/news250120) [distilled models](https://ollama.com/library/deepseek-r1).
-- [Building Ollama Deep Researcher from Scratch](https://www.youtube.com/watch?v=XGuTzHoqlj8) - Overview of how this is built.
+Ollama Deep Researcher is a fully local web research assistant that uses any LLM hosted by [Ollama](https://ollama.com/search). It generates web search queries, gathers results, summarizes findings, identifies knowledge gaps, and iteratively improves the summary for a user-defined number of cycles. The final output is a markdown summary with all sources used.
 
 ## 🚀 Quickstart
-
-### Mac
-
-1. Download the Ollama app for Mac [here](https://ollama.com/download).
-
-2. Pull a local LLM from [Ollama](https://ollama.com/search). As an [example](https://ollama.com/library/deepseek-r1:8b):
-```bash
-ollama pull deepseek-r1:8b
-```
-
-3. Clone the repository:
-```bash
-git clone https://github.com/langchain-ai/ollama-deep-researcher.git
-cd ollama-deep-researcher
-```
-
-4. Select a web search tool:
-
-By default, it will use [DuckDuckGo](https://duckduckgo.com/) for web search, which does not require an API key. But you can also use [Tavily](https://tavily.com/) or [Perplexity](https://www.perplexity.ai/hub/blog/introducing-the-sonar-pro-api) by adding their API keys to the environment file:
-```bash
-cp .env.example .env
-```
-
-The following environment variables are supported:
-
-  * `OLLAMA_BASE_URL` - the endpoint of the Ollama service, defaults to `http://localhost:11434` if not set 
-  * `OLLAMA_MODEL` - the model to use, defaults to `llama3.2` if not set
-  * `SEARCH_API` - the search API to use, either `duckduckgo` (default) or `tavily` or `perplexity`. You need to set the corresponding API key if tavily or perplexity is used.
-  * `TAVILY_API_KEY` - the tavily API key to use
-  * `PERPLEXITY_API_KEY` - the perplexity API key to use
-  * `MAX_WEB_RESEARCH_LOOPS` - the maximum number of research loop steps, defaults to `3`
-  * `FETCH_FULL_PAGE` - fetch the full page content if using `duckduckgo` for the search API, defaults to `false`
-
-5. (Recommended) Create a virtual environment:
-```bash
-python -m venv .venv
-source .venv/bin/activate
-```
-
-6. Launch the assistant:
-
-```bash
-# Install uv package manager
-curl -LsSf https://astral.sh/uv/install.sh | sh
-uvx --refresh --from "langgraph-cli[inmem]" --with-editable . --python 3.11 langgraph dev
-```
 
 ### Windows
 
 1. Download the Ollama app for Windows [here](https://ollama.com/download).
 
-2. Pull a local LLM from [Ollama](https://ollama.com/search). As an [example](https://ollama.com/library/deepseek-r1:8b):
+2. Pull a local LLM from [Ollama](https://ollama.com/search). For example:
 ```powershell
 ollama pull deepseek-r1:8b
 ```
@@ -75,119 +18,73 @@ ollama pull deepseek-r1:8b
 git clone https://github.com/langchain-ai/ollama-deep-researcher.git
 cd ollama-deep-researcher
 ```
- 
-4. Select a web search tool, as above.
 
-5. (Recommended) Create a virtual environment: Install `Python 3.11` (and add to PATH during installation). Restart your terminal to ensure Python is available, then create and activate a virtual environment:
-
+4. (Recommended) Create a virtual environment:
 ```powershell
 python -m venv .venv
 .venv\Scripts\Activate.ps1
 ```
 
-6. Launch the assistant:
-
+5. Install dependencies:
 ```powershell
-# Install dependencies
 pip install -e .
-pip install -U "langgraph-cli[inmem]"            
-
-# Start the assistant
-langgraph dev
 ```
 
-### Model Compatibility Note
+6. Launch the assistant:
+```powershell
+python app.py
+```
 
-When selecting a local LLM, note that this application relies on the model's ability to produce structured JSON output. Some models may have difficulty with this requirement:
+### Folder-Based Video Creation
 
-- **Working well**: 
-  - [Llama2 3.2](https://ollama.com/library/llama3.2)
-  - [DeepSeek R1 (8B)](https://ollama.com/library/deepseek-r1:8b)
-  
-- **Known issues**:
-  - [DeepSeek R1 (7B)](https://ollama.com/library/deepseek-llm:7b) - Currently has difficulty producing required JSON output
-  
-If you [encounter JSON-related errors](https://github.com/langchain-ai/ollama-deep-researcher/issues/18) (e.g., `KeyError: 'query'`), try switching to one of the confirmed working models.
+This feature allows users to process a folder containing `.mp3` and `.png` files to create videos. The system will:
+1. Pair `.mp3` and `.png` files within subfolders.
+2. Use `ffmpeg` to create individual video clips for each pair.
+3. Optionally merge these clips into a single `.mp4` file with fade-in/out transitions.
 
-### Browser Compatibility Note
+#### How to Use
+1. Open the application in your browser.
+2. Use the `/process-folder` endpoint to submit a folder path and specify whether to generate a final concatenated video.
+3. The processed videos will be saved in their respective subfolders, and the final video (if generated) will be saved in the root folder as `output.mp4`.
 
-When accessing the assistant:
-- Firefox is recommended for the best experience
-- Safari users may encounter security warnings due to mixed content (HTTPS/HTTP)
-- If you encounter issues, try:
-  1. Using Firefox or another browser
-  2. Disabling ad-blocking extensions
-  3. Checking browser console for specific error messages
+#### Example API Request
+To process a folder and generate a final video:
+```bash
+curl -X POST http://localhost:9125/process-folder \
+-H "Content-Type: application/json" \
+-d '{
+  "folderPath": "/path/to/folder",
+  "generateFinalVideo": true
+}'
+```
 
-## How it works
+#### Example Output
+- Individual videos: Saved in their respective subfolders as `output.mp4`.
+- Final concatenated video: Saved in the root folder as `output.mp4`.
 
-Ollama Deep Researcher is inspired by [IterDRAG](https://arxiv.org/html/2410.04343v1#:~:text=To%20tackle%20this%20issue%2C%20we,used%20to%20generate%20intermediate%20answers.). This approach will decompose a query into sub-queries, retrieve documents for each one, answer the sub-query, and then build on the answer by retrieving docs for the second sub-query. Here, we do similar:
-- Given a user-provided topic, use a local LLM (via [Ollama](https://ollama.com/search)) to generate a web search query
-- Uses a search engine (configured for [DuckDuckGo](https://duckduckgo.com/), [Tavily](https://www.tavily.com/), or [Perplexity](https://www.perplexity.ai/hub/blog/introducing-the-sonar-pro-api)) to find relevant sources
-- Uses LLM to summarize the findings from web search related to the user-provided research topic
-- Then, it uses the LLM to reflect on the summary, identifying knowledge gaps
-- It generates a new search query to address the knowledge gaps
-- The process repeats, with the summary being iteratively updated with new information from web search
-- It will repeat down the research rabbit hole
-- Runs for a configurable number of iterations
+### Notes
+- Ensure subfolders contain `.mp3` and `.png` files.
+- Files are processed in the order of their modification times.
+- The `generateFinalVideo` option determines whether a final concatenated video is created.
 
 ## Outputs
 
-The output is a markdown file containing the research summary, with citations to the sources used.
+The output is a markdown file containing the research summary, with citations to the sources used. All sources gathered during research are saved.
 
-All sources gathered during research are saved.
+## How it works
 
-## Deployment Options
-
-There are [various ways](https://langchain-ai.github.io/langgraph/concepts/#deployment-options) to deploy this.
-
-## TypeScript Implementation
-
-A TypeScript port of this project (without Perplexity search) is available at:
-https://github.com/PacoVK/ollama-deep-researcher-ts
+1. Given a user-provided topic, the system uses a local LLM to generate a web search query.
+2. It uses a search engine to find relevant sources.
+3. The LLM summarizes the findings from the web search.
+4. The LLM reflects on the summary, identifying knowledge gaps.
+5. It generates a new search query to address the gaps.
+6. The process repeats for a configurable number of iterations.
 
 ## Running as a Docker container
 
-The included `Dockerfile` only runs the assistant as a service, but does not include Ollama as a dependant service. You must run Ollama separately and configure the `OLLAMA_BASE_URL` environment variable. Optionally you can also specify the Ollama model to use by providing the `OLLAMA_MODEL` environment variable.
+The Docker-based setup is no longer supported. Instead, the application now uses `dify` for deployment. Update your workflow to use the new `dify`-based setup.
 
-Clone the repo and build an image:
-```
-$ docker build -t ollama-deep-researcher .
-```
+## Deprecated Features
 
-Run the container:
-```
-$ docker run --rm -it -p 2024:2024 \
-  -e SEARCH_API="tavily" \ 
-  -e TAVILY_API_KEY="tvly-***YOUR_KEY_HERE***" \
-  -e OLLAMA_BASE_URL="http://host.docker.internal:11434/" \
-  -e OLLAMA_MODEL="llama3.2" \  
-  ollama-deep-researcher
-```
-
-NOTE: You will see log message:
-```
-2025-02-10T13:45:04.784915Z [info     ] 🎨 Opening Studio in your browser... [browser_opener] api_variant=local_dev message=🎨 Opening Studio in your browser...
-URL: https://smith.langchain.com/studio/?baseUrl=http://0.0.0.0:2024
-```
-...but the browser will not launch from the container.
-
-Instead, visit this link with the correct baseUrl IP address: [`https://smith.langchain.com/studio/thread?baseUrl=http://127.0.0.1:2024`](https://smith.langchain.com/studio/thread?baseUrl=http://127.0.0.1:2024)
-
-## New Feature: Folder-Based Video Creation
-
-### Overview
-This feature allows users to select a folder containing `.mp3` and `.png` files. The system will:
-1. Pair `.mp3` and `.png` files based on their modification times.
-2. Use `ffmpeg` to create individual video clips for each pair.
-3. Merge these clips into a single `.mp4` file with fade-in/out transitions.
-
-### How to Use
-1. Open the application in your browser.
-2. Enter the folder path in the "Select Folder" field.
-3. Submit the form.
-4. The processed video will be saved in the same folder as `final_output.mp4`.
-
-### Notes
-- Ensure the folder contains an equal number of `.mp3` and `.png` files.
-- Files are processed in the order of their modification times.
+- **Docker-based deployment**: The previous Docker setup using `ollama` and `langchain` is no longer functional.
+- **Unused API Endpoints**: Endpoints like `/save_mp3` and `/generate-and-save-images` are currently not in active use and may be removed in future updates.
