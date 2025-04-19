@@ -33,8 +33,9 @@
   "music":"整體配樂的AI生成音樂提示詞參考<說明>",
   "content": [
     {
+      "No.": "段落編號",
       "caption": "段落標題",
-      "UUID": "兩碼順序碼 + 16碼的唯一識別碼",
+      "UUID": "16碼的唯一識別碼",
       "description": "段落描述或時間標記",
       "Narration": "旁白",
       "speak_instructions":"text-to-speech提示詞，帶入情感標記",

@@ -98,7 +98,24 @@ def get_video_duration(video_path):
 
 
     
-# if __name__ == "__main__":
-#     batch_dir = "G:\\batch\\"
-#     target_base_dir = "G:\\ai_generate\\The_Great_Underground_Discovery_Massive_Structures_Beneath_the_Giza_Pyramids\\"
-    # result = replace_png_files(batch_dir, target_base_dir)
+if __name__ == "__main__":
+
+    # 迭代指定資料夾下的所有子資料夾
+    folder_path = r"G:\ai_generate\Beyond a Millennium, The Mystery of Genesis Patriarchs and the Great Flood"
+    for subdir in os.listdir(folder_path):
+        subdir_path = os.path.join(folder_path, subdir)
+        if os.path.isdir(subdir_path):
+            # 取出唯一 .mp3與.png
+            mp3_files = [f for f in os.listdir(subdir_path) if f.endswith('.mp3')]
+            png_files = [f for f in os.listdir(subdir_path) if f.endswith('.png')]
+
+            if len(mp3_files) == 1 and len(png_files) == 1: 
+                mp3_path = os.path.join(subdir_path, mp3_files[0])
+                png_path = os.path.join(subdir_path, png_files[0])
+                output_path = os.path.join(subdir_path, "output.mp4")
+
+                # 產生影片
+                if generate_video(mp3_path, png_path, output_path):
+                    print(f"Video generated successfully: {output_path}")
+                else:
+                    print(f"Failed to generate video for {subdir}")
