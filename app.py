@@ -1,11 +1,11 @@
-import logging
+import logging  # noqa: D100
 import os
 import time
 import traceback  # 新增 traceback 模組
 
 import requests
 from dotenv import load_dotenv
-from flask import Flask, json, jsonify, render_template, request, session
+from flask import Flask, json, jsonify, render_template, request
 from werkzeug.utils import secure_filename
 
 from combine_script import combine_media
@@ -31,6 +31,10 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# 在程式啟動時新增測試日誌
+logger.info("Logger initialized successfully")
+logger.debug("Current working directory: %s", os.getcwd())
+
 progress = {}  # 用於存儲進度狀態
 
 SAVE_MP3 = os.getenv("SAVE_MP3", "./saved_mp3")
@@ -44,7 +48,7 @@ def prompt_transform(prompt):
     return secure_filename(basename)
 
 def update_progress(folder_path):
-    """模擬進度更新的後台任務"""
+    """模擬進度更新的後台任務."""
     global progress
     progress[folder_path] = 0
     for i in range(1, 101):
@@ -58,7 +62,10 @@ def save_mp3():
     logger.info("Received request to /save_mp3")
     data = request.get_json()
     jobj = data.get("jobj")
+    No = data.get("No", "")
     save_dir = data.get("save_dir", SAVE_MP3)
+    logger.debug(f"Request data: jobj={jobj}, No={No}, save_dir={save_dir}")
+
     if not jobj:
         logger.warning("No jobj provided in the request")
         return jsonify({"error": "未提供 jobj"}), 400
@@ -66,7 +73,9 @@ def save_mp3():
     try:
         # 檢查檔案是否已存在
         basename = prompt_transform(jobj.get("input"))
-        filename = os.path.join(save_dir, f"{basename}.mp3")
+        filename = os.path.join(save_dir, f"{No}{basename}.mp3")
+        logger.debug(f"Generated filename: {filename}")
+
         if os.path.exists(filename):
             logger.info(f"MP3 file already exists at {filename}, skipping generation")
             return jsonify({
@@ -88,6 +97,7 @@ def save_mp3():
             "Content-Type": "application/json"
         }
         logger.info("Sending TTS request to OpenAI API")
+        logger.info(json.dumps(jobj, indent=2, ensure_ascii=False))
         tts_response = requests.post(tts_url, headers=headers, json=jobj)
         tts_response.raise_for_status()
 
@@ -147,6 +157,8 @@ def upload_json():
     try:
         # Load and validate JSON
         data = json.load(file)
+        logger.debug(f"Uploaded JSON content: {data}")
+
         if not validate_format(data):
             logger.warning("Invalid JSON format")
             return jsonify({"error": "Invalid JSON format"}), 400
@@ -161,6 +173,7 @@ def upload_json():
         json_filename = secure_filename(data.get("title"))
         da_dir = os.path.join(init_dir, json_filename)
         os.makedirs(da_dir, exist_ok=True)
+        logger.debug(f"Created directory: {da_dir}")
 
         # Extract relevant data from the Response objects before appending to results
         results = []
@@ -169,10 +182,12 @@ def upload_json():
             if not caption:
                 logger.error("Caption is missing or invalid in one of the content items")
                 return jsonify({"error": "Caption is missing or invalid"}), 400
+            No = item.get("No.", "")
 
             caption = secure_filename(caption)
-            db_dir = os.path.join(da_dir, caption)
+            db_dir = os.path.join(da_dir, f"{No}{caption}")
             os.makedirs(db_dir, exist_ok=True)
+            logger.debug(f"Created subdirectory: {db_dir}")
 
             # Call /save_mp3
             narration = item.get("Narration", "")
@@ -190,7 +205,13 @@ def upload_json():
             logger.info(f"Calling /save_mp3 for narration: {narration[:30]}")
 
             headers = {"Content-Type": "application/json"}
-            tts_response = requests.post("http://localhost:9125/save_mp3", json={"jobj": tts_payload, "save_dir": db_dir}, headers=headers)
+            tts_response = requests.post("http://localhost:9125/save_mp3", 
+                                         json={
+                                             "jobj": tts_payload, 
+                                             "save_dir": db_dir,
+                                             "No": No,
+                                             }, headers=headers)
+            logger.debug(f"/save_mp3 response: {tts_response.status_code}, {tts_response.text}")
             tts_response_data = {
                 "status_code": tts_response.status_code,
                 "response": tts_response.json() if tts_response.status_code == 200 else tts_response.text
@@ -202,6 +223,7 @@ def upload_json():
             if prompt:
                 logger.info(f"Calling /generate-and-save-images for prompt: {prompt[:30]}")
                 image_response = call_generate_and_save_images(prompt, db_dir)
+                logger.debug(f"/generate-and-save-images response: {image_response}")
                 results[-1]["generate_and_save_images"] = image_response
 
         logger.info("JSON file processed successfully")
@@ -237,7 +259,7 @@ def process_folder():
 
 @app.route('/progress/<folder_path>', methods=['GET'])
 def get_progress(folder_path):
-    """返回指定文件夾的進度狀態"""
+    """返回指定文件夾的進度狀態."""
     global progress
     current_progress = progress.get(folder_path, 0)
     return jsonify({'progress': current_progress}), 200

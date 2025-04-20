@@ -18,12 +18,16 @@ def call_generate_and_save_images(prompt, save_dir):
 
         # 處理 prompt 並生成安全的文件名
         basename = secure_filename(prompt[:50])
+        file_path = os.path.join(save_dir, f"{basename}.png")
 
-        # return {
-        #     "status": "test: success",
-        #     "message": "test: Image generated successfully",
-        #     "file": f"test: {save_dir}/{basename}.png"
-        # }
+        # 如果檔案已經存在，直接返回成功訊息
+        if os.path.exists(file_path):
+            return {
+                "status": "success",
+                "message": "Image already exists",
+                "file": file_path
+            }
+
         # 獲取 API 金鑰
         api_key = os.getenv("GEMINI_API_KEY")
         if not api_key:
@@ -40,7 +44,6 @@ def call_generate_and_save_images(prompt, save_dir):
         # 保存生成的圖片
         generated_image = response.generated_images[0]  # 只取第一張圖片
         image = Image.open(BytesIO(generated_image.image.image_bytes))
-        file_path = os.path.join(save_dir, f"{basename}.png")
         image.save(file_path)
 
         return {

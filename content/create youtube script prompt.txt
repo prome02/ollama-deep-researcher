@@ -1,18 +1,26 @@
 精簡版
 ///
 整理截至目前的討論。
-以 <language> 撰寫面向一般成年人、長度約10分鐘的 YouTube 劇本與旁白。內容依以下 <structure> 結構撰寫(段落數量不限制)，若需要額外蒐集參考資料以英文資料為主(>50%) > 繁中 > 簡中。最終以標準 JSON（<format>）輸出：
+以 <language> 撰寫面向一般成年人、長度約20分鐘的 YouTube 劇本旁白，語氣用詞略偏說故事的方式。內容依以下 <structure> 結構撰寫(段落數量不限制)，若需要額外蒐集參考資料以英文資料為主(>50%) > 繁中 > 簡中。最終以標準 JSON（<format>）輸出：
 
 <structure>
 1. 主題背景：建立興趣、埋設懸念
 2. 事件詳述：說明人物、背景、技術、裝置、時間與地點；保留懸念並鼓勵留言
 3. 觀點反思：提出邏輯疑點、衝突觀點與多元立場
 4. 結論總整：綜合討論、判斷可信度、補充延伸話題、收尾
+</structure>
+
+<語音製作提示樣本>
+Affect: Deep, commanding, and slightly dramatic, with an archaic and reverent quality that reflects the grandeur of Olde English storytelling.
+Tone: Noble, heroic, and formal, capturing the essence of medieval knights and epic quests, while reflecting the antiquated charm of Olde English.
+Emotion: Excitement, anticipation, and a sense of mystery, combined with the seriousness of fate and duty.
+Pronunciation: Clear, deliberate, and with a slightly formal cadence. Specific words like "hast," "thou," and "doth" should be pronounced slowly and with emphasis to reflect Olde English speech patterns.
+Pause: Pauses after important Olde English phrases such as "Lo!" or "Hark!" and between clauses like "Choose thy path" to add weight to the decision-making process and allow the listener to reflect on the seriousness of the quest.
+</語音製作提示樣本>
 
 <format>產生屬性時注意事項：
-- "Narration" 限 100 詞，便於生成精準 "speak_instructions"（≤10詞）。
+- "speak_instructions" 基於 Narration。若相鄰節點的speak_instructions近似, 則應該合併節點。 格式參考<語音製作提示樣本>,節省token的輸出成本
 - "prompt" 基於 Narration、符合 [Imagen3 圖片提示指南](https://ai.google.dev/gemini-api/docs/imagen-prompt-guide?hl=zh-tw)，風格需事先討論
-- "music_prompt" 基於 Narration，具備<說明>等項目：
 - 檢查各段落的"Narration",移除不必要的重複資訊
 
 <說明>
@@ -22,6 +30,7 @@
 - 氛圍形容詞（如: nostalgic, eerie）
 - 編曲品質（如: layered, rich texture）
 - 節奏速度（如: 90 BPM）
+</說明>
 
 最終輸出為 JSON 格式 <format>，包含 content、resource 與可選 note 欄。圖片與音樂風格未明確時請先詢問。
 
@@ -33,14 +42,14 @@
   "music":"整體配樂的AI生成音樂提示詞參考<說明>",
   "content": [
     {
-      "No.": "段落編號",
+      "No.": "段落編號, 01, 02, 03, ...",
       "caption": "段落標題",
       "UUID": "16碼的唯一識別碼",
-      "description": "段落描述或時間標記",
-      "Narration": "旁白",
-      "speak_instructions":"text-to-speech提示詞，帶入情感標記",
-      "prompt":"AI 生成圖片的提示詞",
-	    "music_prompt":"AI 生成配樂的提示詞，非必要"
+      "timestamp": "時間標記",
+      "voice_actor": "語音角色,非必要",
+      "Narration": "旁白，限 300 詞(這限制是最高優先權)",
+      "speak_instructions":"text-to-speech提示詞，最後要停頓一秒",
+      "prompt":"AI 生成圖片的提示詞"
     },
     ...
   ],

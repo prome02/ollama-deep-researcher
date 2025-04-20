@@ -11,7 +11,6 @@ from tqdm import tqdm
 
 # Initialize logger
 logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def generate_pause_video(pause_duration, fade_duration, resolution, frame_rate, pix_fmt):
     cache_dir = Path("./pause_cache")
