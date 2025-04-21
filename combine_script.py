@@ -239,60 +239,62 @@ def combine_media(folder_path, generate_final_video: bool = False):
         total_subdirs = len(subdirs)
 
         with tqdm(total=total_subdirs, desc="Processing folders", unit="folder") as pbar:
-            for subdir in subdirs:
-                if not os.path.isdir(subdir):
-                    pbar.update(1)
-                    continue
-
-                png_files = glob.glob(os.path.join(subdir, '*.png'))
-                mp3_files = glob.glob(os.path.join(subdir, '*.mp3'))
-
-                if png_files and mp3_files:
-                    img_file = png_files[0]
-                    aud_file = mp3_files[0]
-                    output_file = os.path.join(subdir, 'output.mp4')
-
-                    # Skip if output_file already exists
-                    if os.path.exists(output_file):
-                        logger.info(f"Skipping {subdir} as output file already exists.")
-                        results.append({subdir: 'Output file already exists'})
+            try:
+                for subdir in subdirs:
+                    if not os.path.isdir(subdir):
                         pbar.update(1)
                         continue
 
-                    if merge_media_files(img_file, aud_file, output_file):
-                        logger.info(f"Created video for {subdir}")
-                        results.append({subdir: 'Video created successfully'})
-                    else:
-                        results.append({subdir: 'Error creating video'})
+                    png_files = glob.glob(os.path.join(subdir, '*.png'))
+                    mp3_files = glob.glob(os.path.join(subdir, '*.mp3'))
 
-                pbar.update(1)
-    # [to do]
-    
-    #     if not generate_final_video:
-    #         logger.info("Skipping final video generation as generate_final_video is False.")
-    #         return results
+                    if png_files and mp3_files:
+                        img_file = png_files[0]
+                        aud_file = mp3_files[0]
+                        output_file = os.path.join(subdir, 'output.mp4')
 
-    #     subdirs = sorted(
-    #         [d for d in os.listdir('.') if os.path.isdir(d) and os.path.exists(os.path.join(d, 'output.mp4'))],
-    #         key=lambda x: os.path.getctime(x)
-    #     )
+                        # Skip if output_file already exists
+                        if os.path.exists(output_file):
+                            logger.info(f"Skipping {subdir} as output file already exists.")
+                            results.append({subdir: 'Output file already exists'})
+                            pbar.update(1)
+                            continue
 
-    #     if not subdirs:
-    #         logger.warning("No videos found to concatenate.")
-    #         os.chdir(original_dir)
-    #         return {"status": "No videos to concatenate"}
+                        if merge_media_files(img_file, aud_file, output_file):
+                            logger.info(f"Created video for {subdir}")
+                            results.append({subdir: 'Video created successfully'})
+                        else:
+                            results.append({subdir: 'Error creating video'})
 
-    #     video_paths = [os.path.join(subdir, 'output.mp4') for subdir in subdirs]
-    #     final_output = os.path.join(folder_path, 'output.mp4')
+                    pbar.update(1)
+            finally:
+                pbar.close()  # Ensure the progress bar is closed even if an error occurs
 
-    #     if concatenate_video_files(video_paths, final_output,{
-    #     "pause_duration": 2,
-    #     "fade_duration": 1
-    # }):
-    #         logger.info("Final video created successfully.")
-    #         results.append({"final_output": "Video concatenated successfully"})
-    #     else:
-    #         results.append({"final_output": "Error concatenating videos"})
+        # if not generate_final_video:
+        #     logger.info("Skipping final video generation as generate_final_video is False.")
+        #     return results
+
+        # subdirs = sorted(
+        #     [d for d in os.listdir('.') if os.path.isdir(d) and os.path.exists(os.path.join(d, 'output.mp4'))],
+        #     key=lambda x: os.path.getctime(x)
+        # )
+
+        # if not subdirs:
+        #     logger.warning("No videos found to concatenate.")
+        #     os.chdir(original_dir)
+        #     return {"status": "No videos to concatenate"}
+
+        # video_paths = [os.path.join(subdir, 'output.mp4') for subdir in subdirs]
+        # final_output = os.path.join(folder_path, 'output.mp4')
+
+        # if concatenate_video_files(video_paths, final_output, {
+        #     "pause_duration": 2,
+        #     "fade_duration": 1
+        # }):
+        #     logger.info("Final video created successfully.")
+        #     results.append({"final_output": "Video concatenated successfully"})
+        # else:
+        #     results.append({"final_output": "Error concatenating videos"})
 
     finally:
         os.chdir(original_dir)
@@ -300,7 +302,7 @@ def combine_media(folder_path, generate_final_video: bool = False):
     return results
 
 def test_concatenation(video_files, output_path, pause_duration=0, fade_duration=0):
-    """測試不同設定的影片合併效果"""
+    """測試不同設定的影片合併效果."""
     print(f"\n{'='*50}")
     print(f"Testing with pause_duration={pause_duration}, fade_duration={fade_duration}")
     print(f"{'='*50}")

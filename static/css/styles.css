@@ -29,6 +29,11 @@ body {
     border-radius: 5px;
 }
 
+/* Apply consistent margin to all internal elements of <div class="mb-3"> */
+.mb-3 > * {
+    margin-bottom: 1rem;
+}
+
 .row {
     display: flex;
 }
@@ -45,3 +50,15 @@ body {
 #progressBar {
     width: 0%;
 }
+
+/* #imageFile {
+    margin-bottom: 1rem;
+}
+
+#cropWidth {
+    margin-bottom: 1rem;
+}
+
+#cropHeight {
+    margin-bottom: 1rem;
+} */
