@@ -1,3 +1,11 @@
+"""Utility functions for generating images, videos, and managing files.
+
+This module provides:
+- Functions to generate images using Google GenAI.
+- Video generation using static images and audio.
+- File renaming based on creation time.
+"""
+
 import os
 from io import BytesIO
 
@@ -100,25 +108,44 @@ def get_video_duration(video_path):
         return 0
 
 
-    
+def rename_output_files_by_creation_time(folder_path):  # noqa: D103
+    # Get all subdirectories in the folder
+    subdirs = [os.path.join(folder_path, d) for d in os.listdir(folder_path) if os.path.isdir(os.path.join(folder_path, d))]
+
+    # Sort subdirectories by creation time (earliest first)
+    subdirs.sort(key=lambda d: os.path.getctime(d))
+
+    # Iterate through sorted subdirectories and rename output.mp4 files
+    for index, subdir in enumerate(subdirs, start=1):
+        output_file_path = os.path.join(subdir, "output.mp4")
+        if os.path.exists(output_file_path):
+            new_name = f"{str(index).zfill(2)}_output.mp4"
+            new_file_path = os.path.join(subdir, new_name)
+            os.rename(output_file_path, new_file_path)
+            print(f"Renamed {output_file_path} to {new_file_path}")
+
+
 if __name__ == "__main__":
 
     # 迭代指定資料夾下的所有子資料夾
-    folder_path = r"G:\ai_generate\Beyond a Millennium, The Mystery of Genesis Patriarchs and the Great Flood"
-    for subdir in os.listdir(folder_path):
-        subdir_path = os.path.join(folder_path, subdir)
-        if os.path.isdir(subdir_path):
-            # 取出唯一 .mp3與.png
-            mp3_files = [f for f in os.listdir(subdir_path) if f.endswith('.mp3')]
-            png_files = [f for f in os.listdir(subdir_path) if f.endswith('.png')]
+    folder_path = r"G:\ai_generate\Cycles_of_Civilization_Have_We_Been_Here_Before"
+    # for subdir in os.listdir(folder_path):
+    #     subdir_path = os.path.join(folder_path, subdir)
+    #     if os.path.isdir(subdir_path):
+    #         # 取出唯一 .mp3與.png
+    #         mp3_files = [f for f in os.listdir(subdir_path) if f.endswith('.mp3')]
+    #         png_files = [f for f in os.listdir(subdir_path) if f.endswith('.png')]
 
-            if len(mp3_files) == 1 and len(png_files) == 1: 
-                mp3_path = os.path.join(subdir_path, mp3_files[0])
-                png_path = os.path.join(subdir_path, png_files[0])
-                output_path = os.path.join(subdir_path, "output.mp4")
+    #         if len(mp3_files) == 1 and len(png_files) == 1: 
+    #             mp3_path = os.path.join(subdir_path, mp3_files[0])
+    #             png_path = os.path.join(subdir_path, png_files[0])
+    #             output_path = os.path.join(subdir_path, "output.mp4")
 
-                # 產生影片
-                if generate_video(mp3_path, png_path, output_path):
-                    print(f"Video generated successfully: {output_path}")
-                else:
-                    print(f"Failed to generate video for {subdir}")
+    #             # 產生影片
+    #             if generate_video(mp3_path, png_path, output_path):
+    #                 print(f"Video generated successfully: {output_path}")
+    #             else:
+    #                 print(f"Failed to generate video for {subdir}")
+
+    # Rename output files by creation time
+    rename_output_files_by_creation_time(folder_path)
