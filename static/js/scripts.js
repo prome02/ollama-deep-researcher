@@ -72,3 +72,102 @@ function submitFolderPath() {
         alert('An error occurred while processing the folder.');
     });
 }
+
+document.getElementById('cropButton').addEventListener('click', () => {
+    const imageFileInput = document.getElementById('imageFile');
+    const cropWidthInput = document.getElementById('cropWidth');
+    const cropHeightInput = document.getElementById('cropHeight');
+
+    if (!imageFileInput.files.length) {
+        alert('Please select an image file.');
+        return;
+    }
+
+    const file = imageFileInput.files[0];
+    const width = parseInt(cropWidthInput.value, 10);
+    const height = parseInt(cropHeightInput.value, 10);
+
+    if (isNaN(width) || isNaN(height) || width <= 0 || height <= 0) {
+        alert('Please enter valid width and height values.');
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function (event) {
+        const imageSrc = event.target.result;
+        const cropUI = document.createElement('div');
+        cropUI.style.position = 'fixed';
+        cropUI.style.top = '0';
+        cropUI.style.left = '0';
+        cropUI.style.width = '100%';
+        cropUI.style.height = '100%';
+        cropUI.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+        cropUI.style.zIndex = '1000';
+        cropUI.style.display = 'flex';
+        cropUI.style.justifyContent = 'center';
+        cropUI.style.alignItems = 'center';
+
+        const image = document.createElement('img');
+        image.src = imageSrc;
+        image.style.position = 'relative';
+        image.style.maxWidth = '100%';
+        image.style.maxHeight = '100%';
+        cropUI.appendChild(image);
+
+        const redBox = document.createElement('div');
+        redBox.style.position = 'absolute';
+        redBox.style.border = '2px solid red';
+        cropUI.appendChild(redBox);
+
+        document.body.appendChild(cropUI);
+
+        image.onload = () => {
+            const naturalWidth = image.naturalWidth;
+            const naturalHeight = image.naturalHeight;
+            const displayWidth = image.clientWidth;
+            const displayHeight = image.clientHeight;
+
+            const rect = image.getBoundingClientRect(); // Get the actual position of the image
+            const widthRatio = displayWidth / naturalWidth;
+            const heightRatio = displayHeight / naturalHeight;
+
+            redBox.style.width = `${width * widthRatio}px`;
+            redBox.style.height = `${height * heightRatio}px`;
+
+            cropUI.addEventListener('mousemove', (e) => {
+                const x = Math.min(Math.max(e.clientX - rect.left - (width * widthRatio) / 2, 0), rect.width - width * widthRatio);
+                const y = Math.min(Math.max(e.clientY - rect.top - (height * heightRatio) / 2, 0), rect.height - height * heightRatio);
+                redBox.style.left = `${rect.left + x}px`;
+                redBox.style.top = `${rect.top + y}px`;
+            });
+
+            cropUI.addEventListener('click', (e) => {
+                const x = Math.min(Math.max(e.clientX - rect.left - (width * widthRatio) / 2, 0), rect.width - width * widthRatio);
+                const y = Math.min(Math.max(e.clientY - rect.top - (height * heightRatio) / 2, 0), rect.height - height * heightRatio);
+
+                const canvas = document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(image, x / widthRatio, y / heightRatio, width, height, 0, 0, width, height);
+
+                canvas.toBlob((blob) => {
+                    const link = document.createElement('a');
+                    const timestamp = new Date().getTime();
+                    link.download = `cropped_image_${timestamp}.png`;
+                    link.href = URL.createObjectURL(blob);
+                    link.click();
+                });
+
+                document.body.removeChild(cropUI);
+            });
+
+            cropUI.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                document.body.removeChild(cropUI);
+            });
+        };
+    };
+
+    reader.readAsDataURL(file);
+});

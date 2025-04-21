@@ -37,3 +37,11 @@ body {
     flex: 0 0 50%;
     max-width: 50%;
 }
+
+#progressBarContainer {
+    display: none;
+}
+
+#progressBar {
+    width: 0%;
+}

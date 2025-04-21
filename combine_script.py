@@ -252,6 +252,13 @@ def combine_media(folder_path, generate_final_video: bool = False):
                     aud_file = mp3_files[0]
                     output_file = os.path.join(subdir, 'output.mp4')
 
+                    # Skip if output_file already exists
+                    if os.path.exists(output_file):
+                        logger.info(f"Skipping {subdir} as output file already exists.")
+                        results.append({subdir: 'Output file already exists'})
+                        pbar.update(1)
+                        continue
+
                     if merge_media_files(img_file, aud_file, output_file):
                         logger.info(f"Created video for {subdir}")
                         results.append({subdir: 'Video created successfully'})
