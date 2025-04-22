@@ -19,7 +19,7 @@ Pause: Pauses after important Olde English phrases such as "Lo!" or "Hark!" and 
 </語音製作提示樣本>
 
 <format>產生屬性時注意事項：
-- "speak_instructions" 基於 Narration。若相鄰節點的speak_instructions近似, 則應該合併節點。 格式參考<語音製作提示樣本>,節省token的輸出成本
+- "speak_instructions" 基於 Narration。若相鄰節點的speak_instructions近似, 則應該合併節點。 格式參考<語音製作提示樣本>,節省token的輸出成本。旁白音量建議落在-6 dBFS至-12 dBFS區間。
 - "prompt" 基於 Narration、符合 [Imagen3 圖片提示指南](https://ai.google.dev/gemini-api/docs/imagen-prompt-guide?hl=zh-tw)，風格需事先討論
 - 檢查各段落的"Narration",移除不必要的重複資訊
 
@@ -48,7 +48,7 @@ Pause: Pauses after important Olde English phrases such as "Lo!" or "Hark!" and 
       "timestamp": "時間標記",
       "voice_actor": "語音角色,非必要",
       "Narration": "旁白，限 300 詞(這限制是最高優先權)",
-      "speak_instructions":"text-to-speech提示詞，最後要停頓0.5秒",
+      "speak_instructions":"text-to-speech提示詞，最後要停頓0.5秒, 平均音量約在youtube -14 LUFS響度標準",
       "prompt":"AI 生成圖片的提示詞"
     },
     ...

@@ -215,134 +215,140 @@ def concatenate_video_files(video_paths: list, output_path: str, ext_setting: di
             
             return True
 
-def combine_media(folder_path, generate_final_video: bool = False):
+def process_audio_consistency(subdir, output_file):
+    """Normalize audio for the given output file and save the result in the subdirectory.
+
+    Args:
+        subdir (str): The subdirectory containing the output file.
+        output_file (str): The path to the output video file.
+
+    Returns:
+        bool: True if the audio normalization and conversion were successful, False otherwise.
+    """
+    try:
+        final_mp4 = os.path.join(subdir, os.path.splitext(os.path.basename(output_file))[0] + '_.mp4')
+        if os.path.exists(final_mp4) :
+            logger.info(f"Skipping audio consistency for {subdir} as final file already exists.")
+            return True
+        # normalized_dir = os.path.join(subdir, 'normalized')
+        # os.makedirs(normalized_dir, exist_ok=True)
+        normalized_file =  f"{subdir}/output.mkv"
+
+        # Normalize audio
+        normalize_cmd = [
+            'ffmpeg-normalize', output_file, "-o",normalized_file
+        ]
+        subprocess.run(normalize_cmd, check=True)
+
+        # Convert normalized file back to MP4
+        
+        
+        convert_cmd = [
+            'ffmpeg', '-i', normalized_file,
+            '-c', 'copy', final_mp4
+        ]
+
+        subprocess.run(convert_cmd, check=True)
+        subprocess.run(['rm', normalized_file])
+
+        return True
+    except Exception as e:
+        logger.error(f"Error processing audio consistency for {subdir}: {str(e)}")
+        return False
+
+def combine_media(folder_path, generate_final_video: bool = False, audio_consistency: bool = False):
     """Combines image and audio files within subfolders into one video file.
     
     This function:
     1. For each subfolder in the input folder that contains both PNG and MP3 files:
        - Combines the PNG and MP3 into an output.mp4
-    2. Optionally concatenates all output.mp4 files from subfolders based on folder creation time
-    3. Creates a final output.mp4 in the root folder if generate_final_video is True
+    2. Optionally normalizes audio if audio_consistency is True.
+    3. Optionally concatenates all output.mp4 files from subfolders based on folder creation time
+    4. Creates a final output.mp4 in the root folder if generate_final_video is True
     
     Args:
         folder_path (str): Path to the folder containing subfolders with media files
         generate_final_video (bool): Whether to generate the final concatenated video
+        audio_consistency (bool): Whether to normalize audio for output files
     """  # noqa: D401
-    # Convert to absolute path
     folder_path = os.path.abspath(folder_path)
     original_dir = os.getcwd()
     os.chdir(folder_path)
     results = []
-
+    
+    print(f"Current working directory: {os.getcwd()}")
     try:
         subdirs = [d for d in os.listdir('.') if os.path.isdir(d)]
         total_subdirs = len(subdirs)
 
         with tqdm(total=total_subdirs, desc="Processing folders", unit="folder") as pbar:
-            try:
-                for subdir in subdirs:
-                    if not os.path.isdir(subdir):
+            for index, subdir in enumerate(subdirs):
+                if not os.path.isdir(subdir):
+                    pbar.update(1)
+                    continue
+
+                png_files = glob.glob(os.path.join(subdir, '*.png'))
+                mp3_files = glob.glob(os.path.join(subdir, '*.mp3'))
+
+                if png_files and mp3_files:
+                    img_file = png_files[0]
+                    aud_file = mp3_files[0]
+                    output_file = os.path.join(subdir, f'{index}_{subdir}.mp4')
+
+                    output_file_exist= os.path.exists(output_file)
+                    if  output_file_exist and not audio_consistency:
+                        logger.info(f"Skipping {subdir} as output file already exists.")
+                        results.append({subdir: 'Output file already exists'})
                         pbar.update(1)
                         continue
 
-                    png_files = glob.glob(os.path.join(subdir, '*.png'))
-                    mp3_files = glob.glob(os.path.join(subdir, '*.mp3'))
-
-                    if png_files and mp3_files:
-                        img_file = png_files[0]
-                        aud_file = mp3_files[0]
-                        output_file = os.path.join(subdir, 'output.mp4')
-
-                        # Skip if output_file already exists
-                        if os.path.exists(output_file):
-                            logger.info(f"Skipping {subdir} as output file already exists.")
-                            results.append({subdir: 'Output file already exists'})
-                            pbar.update(1)
-                            continue
-
+                    if not output_file_exist:
                         if merge_media_files(img_file, aud_file, output_file):
                             logger.info(f"Created video for {subdir}")
                             results.append({subdir: 'Video created successfully'})
+                    
+                            if audio_consistency:
+                                if process_audio_consistency(subdir, output_file):
+                                    logger.info(f"Audio consistency processed for {subdir}")
+                                else:
+                                    logger.error(f"Failed to process audio consistency for {subdir}")
                         else:
                             results.append({subdir: 'Error creating video'})
-
-                    pbar.update(1)
-            finally:
-                pbar.close()  # Ensure the progress bar is closed even if an error occurs
-
-        # if not generate_final_video:
-        #     logger.info("Skipping final video generation as generate_final_video is False.")
-        #     return results
-
-        # subdirs = sorted(
-        #     [d for d in os.listdir('.') if os.path.isdir(d) and os.path.exists(os.path.join(d, 'output.mp4'))],
-        #     key=lambda x: os.path.getctime(x)
-        # )
-
-        # if not subdirs:
-        #     logger.warning("No videos found to concatenate.")
-        #     os.chdir(original_dir)
-        #     return {"status": "No videos to concatenate"}
-
-        # video_paths = [os.path.join(subdir, 'output.mp4') for subdir in subdirs]
-        # final_output = os.path.join(folder_path, 'output.mp4')
-
-        # if concatenate_video_files(video_paths, final_output, {
-        #     "pause_duration": 2,
-        #     "fade_duration": 1
-        # }):
-        #     logger.info("Final video created successfully.")
-        #     results.append({"final_output": "Video concatenated successfully"})
-        # else:
-        #     results.append({"final_output": "Error concatenating videos"})
+                    else:
+                        if audio_consistency:
+                            if process_audio_consistency(subdir, output_file):
+                                logger.info(f"Audio consistency processed for {subdir}")
+                            else:
+                                logger.error(f"Failed to process audio consistency for {subdir}")
+                pbar.update(1)
 
     finally:
         os.chdir(original_dir)
 
     return results
 
-def test_concatenation(video_files, output_path, pause_duration=0, fade_duration=0):
-    """測試不同設定的影片合併效果."""
-    print(f"\n{'='*50}")
-    print(f"Testing with pause_duration={pause_duration}, fade_duration={fade_duration}")
-    print(f"{'='*50}")
-    
-    # 先測試不加入 pause
-    if pause_duration > 0:
-        print("\nStep 1: Testing without pause first")
-        no_pause_output = f"{output_path.rsplit('.', 1)[0]}_no_pause.mp4"
-        concatenate_video_files(video_files, no_pause_output, {"pause_duration": 0})
+
         
-        # 檢查輸出
-        if os.path.exists(no_pause_output):
-            print(f"No pause test successful: {no_pause_output}")
-        else:
-            print(f"No pause test failed!")
-    
-    # 現在測試加入 pause
-    print("\nStep 2: Testing with configured pause")
-    with_pause_output = output_path
-    result = concatenate_video_files(video_files, with_pause_output, {
-        "pause_duration": pause_duration,
-        "fade_duration": fade_duration
-    })
-    
-    if result:
-        print(f"With pause test successful: {with_pause_output}")
-    else:
-        print(f"With pause test failed!")
-    
-    print(f"\nTest completed. Please check the results manually.")
-
-
 if __name__ == "__main__":
     
     test_videos = ["G:/ai_generate/The_Great_Underground_Discovery_Massive_Structures_Beneath_the_Giza_Pyramids/Academic_Controversy_Skepticism_and_Debate/output.mp4", 
      "G:/ai_generate/The_Great_Underground_Discovery_Massive_Structures_Beneath_the_Giza_Pyramids/Background_The_Giza_Pyramid_Complex/output.mp4"]
+
+    folder_path = "test_folder"  # 替換為實際的資料夾路徑
+    generate_final_video = False
+    audio_consistency = True
+
+    # 呼叫 combine_media 函數
+    results = combine_media(folder_path, generate_final_video=generate_final_video, audio_consistency=audio_consistency)
+
+    # 列印結果
+    for result in results:
+        print(result)
     
     # 測試不同的 pause 設定
-    test_concatenation(test_videos, "output_test1.mp4", pause_duration=2, fade_duration=0.5)
-    test_concatenation(test_videos, "output_test2.mp4", pause_duration=3, fade_duration=1)
+    # test_concatenation(test_videos, "output_test1.mp4", pause_duration=2, fade_duration=0.5)
+    # test_concatenation(test_videos, "output_test2.mp4", pause_duration=3, fade_duration=1)
+    
 #     concatenate_video_files(
 #     ["G:/ai_generate/The_Great_Underground_Discovery_Massive_Structures_Beneath_the_Giza_Pyramids/Academic_Controversy_Skepticism_and_Debate/output.mp4", 
 #      "G:/ai_generate/The_Great_Underground_Discovery_Massive_Structures_Beneath_the_Giza_Pyramids/Background_The_Giza_Pyramid_Complex/output.mp4"],

@@ -28,6 +28,9 @@ document.getElementById('uploadJsonButton').addEventListener('click', async (e) 
 
 function submitFolderPath() {
     const folderPath = document.getElementById('folderPath').value;
+    const generateFinalVideo = document.getElementById('generateFinalVideo').checked;
+    const audioConsistency = document.getElementById('audioConsistency').checked; // Get the value of the new checkbox
+
     const progressBarContainer = document.getElementById('progressBarContainer');
     const progressBar = document.getElementById('progressBar');
 
@@ -40,7 +43,11 @@ function submitFolderPath() {
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ folderPath: folderPath })
+        body: JSON.stringify({
+            folderPath: folderPath,
+            generateFinalVideo: generateFinalVideo,
+            audioConsistency: audioConsistency // Include the new checkbox value in the request
+        })
     })
     .then(response => response.json())
     .then(data => {

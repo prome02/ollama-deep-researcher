@@ -1,5 +1,6 @@
 import logging  # noqa: D100
 import os
+import subprocess
 import time
 import traceback  # 新增 traceback 模組
 
@@ -105,7 +106,6 @@ def save_mp3():
         os.makedirs(save_dir, exist_ok=True)
         with open(filename, "wb") as f:
             f.write(tts_response.content)
-
         logger.info(f"MP3 file saved successfully at {filename}")
         return jsonify({
             "status": "success",
@@ -240,19 +240,16 @@ def process_folder():
         data = request.get_json()
         folder_path = data.get('folderPath')
         generate_final_video = data.get('generateFinalVideo', False)  # Get the checkbox value
+        audio_consistency = data.get('audioConsistency', False)  # Get the new checkbox value
 
-        # Log the checkbox value
+        # Log the checkbox values
         logger.info(f"Generate final video: {generate_final_video}")
+        logger.info(f"Audio consistency: {audio_consistency}")
 
-        result = combine_media(folder_path, generate_final_video)
+        result = combine_media(folder_path, generate_final_video, audio_consistency)
         return jsonify({'status': 'success', 'message': 'Folder processed successfully', 'details': result, 
-        'generateFinalVideo': generate_final_video}), 200
+        'generateFinalVideo': generate_final_video, 'audioConsistency': audio_consistency}), 200
 
-        # Start background process to handle folder
-        # thread = Thread(target=update_progress, args=(folder_path,))
-        # thread.start()
-
-        # return jsonify({'status': 'success', 'message': 'Processing started', 'generateFinalVideo': generate_final_video}), 200
     except Exception as e:
         logger.error(f"Error processing folder: {str(e)}")
         return jsonify({'error': str(e)}), 500
