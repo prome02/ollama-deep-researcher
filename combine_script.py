@@ -242,12 +242,19 @@ def process_audio_consistency(subdir, output_file):
 
         # Convert normalized file back to MP4
         
-        
         convert_cmd = [
-            'ffmpeg', '-i', normalized_file,
-            '-c', 'copy', final_mp4
-        ]
-
+        'ffmpeg',
+        '-i', normalized_file,
+        '-c:v', 'libx264',
+        '-crf', '18',
+        '-pix_fmt', 'yuv420p',
+        '-preset', 'medium',
+        '-c:a', 'aac',
+        '-b:a', '192k',
+        '-movflags', '+faststart',
+        '-y',  # 覆蓋已存在文件
+        final_mp4
+    ]
         subprocess.run(convert_cmd, check=True)
         subprocess.run(['rm', normalized_file])
 
@@ -334,7 +341,7 @@ if __name__ == "__main__":
     test_videos = ["G:/ai_generate/The_Great_Underground_Discovery_Massive_Structures_Beneath_the_Giza_Pyramids/Academic_Controversy_Skepticism_and_Debate/output.mp4", 
      "G:/ai_generate/The_Great_Underground_Discovery_Massive_Structures_Beneath_the_Giza_Pyramids/Background_The_Giza_Pyramid_Complex/output.mp4"]
 
-    folder_path = r"G:\ai_generate\Cycles_of_Civilization_Have_We_Been_Here_Before"  # 替換為實際的資料夾路徑
+    folder_path = r"test_folder"  # 替換為實際的資料夾路徑
     generate_final_video = False
     audio_consistency = True
 

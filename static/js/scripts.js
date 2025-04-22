@@ -80,6 +80,22 @@ function submitFolderPath() {
     });
 }
 
+function checkProgress(folderPath) {
+    fetch(`/progress/${folderPath}`)
+        .then(response => response.json())
+        .then(data => {
+            console.log(`Progress: ${data.progress}%`);
+            if (data.complete) {
+                console.log("Processing complete!");
+                clearInterval(progressInterval); // 停止輪詢
+            }
+        })
+        .catch(error => console.error('Error:', error));
+}
+
+// 每秒輪詢一次
+const progressInterval = setInterval(() => checkProgress('G:\\ai_generate\\Cycles_of_Civilization_Have_We_Been_Here_Before'), 1000);
+
 document.getElementById('cropButton').addEventListener('click', () => {
     const imageFileInput = document.getElementById('imageFile');
     const cropWidthInput = document.getElementById('cropWidth');

@@ -239,12 +239,17 @@ def process_folder():
     try:
         data = request.get_json()
         folder_path = data.get('folderPath')
-        generate_final_video = data.get('generateFinalVideo', False)  # Get the checkbox value
-        audio_consistency = data.get('audioConsistency', False)  # Get the new checkbox value
+        generate_final_video = data.get('generateFinalVideo', False)
+        audio_consistency = data.get('audioConsistency', False)
 
         # Log the checkbox values
         logger.info(f"Generate final video: {generate_final_video}")
         logger.info(f"Audio consistency: {audio_consistency}")
+
+        # 啟動後台進度更新
+        from threading import Thread
+        thread = Thread(target=update_progress, args=(folder_path,))
+        thread.start()
 
         result = combine_media(folder_path, generate_final_video, audio_consistency)
         return jsonify({'status': 'success', 'message': 'Folder processed successfully', 'details': result, 
@@ -259,6 +264,8 @@ def get_progress(folder_path):
     """返回指定文件夾的進度狀態."""
     global progress
     current_progress = progress.get(folder_path, 0)
+    if current_progress == 100:
+        del progress[folder_path]  # 清理進度
     return jsonify({'progress': current_progress}), 200
 
 @app.route('/save-text', methods=['POST'])
