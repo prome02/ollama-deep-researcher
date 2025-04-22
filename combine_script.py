@@ -293,7 +293,7 @@ def combine_media(folder_path, generate_final_video: bool = False, audio_consist
                 if png_files and mp3_files:
                     img_file = png_files[0]
                     aud_file = mp3_files[0]
-                    output_file = os.path.join(subdir, f'{index}_{subdir}.mp4')
+                    output_file = os.path.join(subdir, f'{subdir}.mp4')
 
                     output_file_exist= os.path.exists(output_file)
                     if  output_file_exist and not audio_consistency:
@@ -334,7 +334,7 @@ if __name__ == "__main__":
     test_videos = ["G:/ai_generate/The_Great_Underground_Discovery_Massive_Structures_Beneath_the_Giza_Pyramids/Academic_Controversy_Skepticism_and_Debate/output.mp4", 
      "G:/ai_generate/The_Great_Underground_Discovery_Massive_Structures_Beneath_the_Giza_Pyramids/Background_The_Giza_Pyramid_Complex/output.mp4"]
 
-    folder_path = "test_folder"  # 替換為實際的資料夾路徑
+    folder_path = r"G:\ai_generate\Cycles_of_Civilization_Have_We_Been_Here_Before"  # 替換為實際的資料夾路徑
     generate_final_video = False
     audio_consistency = True
 
