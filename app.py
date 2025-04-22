@@ -238,13 +238,18 @@ def process_folder():
     """Process the selected folder to create a video from .mp3 and .png files."""
     try:
         data = request.get_json()
-        folder_path = data.get('folderPath')
+        folder_path = os.path.normpath(data.get('folderPath'))  # 標準化路徑
         generate_final_video = data.get('generateFinalVideo', False)
         audio_consistency = data.get('audioConsistency', False)
 
         # Log the checkbox values
         logger.info(f"Generate final video: {generate_final_video}")
         logger.info(f"Audio consistency: {audio_consistency}")
+
+        # 初始化進度
+        global progress
+        if folder_path not in progress:
+            progress[folder_path] = 0
 
         # 啟動後台進度更新
         from threading import Thread
@@ -259,10 +264,17 @@ def process_folder():
         logger.error(f"Error processing folder: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
-@app.route('/progress/<folder_path>', methods=['GET'])
+@app.route('/progress/<path:folder_path>', methods=['GET'])
 def get_progress(folder_path):
     """返回指定文件夾的進度狀態."""
     global progress
+    folder_path = os.path.normpath(folder_path)  # 標準化路徑
+    logger.info(f"Progress request for folder: {folder_path}")
+
+    if folder_path not in progress:
+        logger.warning(f"Progress not initialized for folder: {folder_path}")
+        return jsonify({'error': 'Progress not initialized for this folder'}), 404
+
     current_progress = progress.get(folder_path, 0)
     if current_progress == 100:
         del progress[folder_path]  # 清理進度

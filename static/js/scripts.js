@@ -93,8 +93,46 @@ function checkProgress(folderPath) {
         .catch(error => console.error('Error:', error));
 }
 
-// 每秒輪詢一次
-const progressInterval = setInterval(() => checkProgress('G:\\ai_generate\\Cycles_of_Civilization_Have_We_Been_Here_Before'), 1000);
+
+function startProcessing(folderPath) {
+    const generateFinalVideo = document.getElementById('generateFinalVideo').checked;
+    const audioConsistency = document.getElementById('audioConsistency').checked;
+
+    fetch('/process-folder', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ folderPath: folderPath, generateFinalVideo: generateFinalVideo, audioConsistency: audioConsistency })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            console.log('Processing started successfully');
+            startProgressPolling(folderPath); // 開始輪詢進度
+        } else {
+            console.error('Error starting processing:', data.message);
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+function startProgressPolling(folderPath) {
+    const normalizedPath = folderPath.replace(/\\/g, '/'); // 將反斜杠替換為正斜杠
+    const progressInterval = setInterval(() => {
+        fetch(`/progress/${encodeURIComponent(normalizedPath)}`)
+            .then(response => response.json())
+            .then(data => {
+                console.log(`Progress: ${data.progress}%`);
+                if (data.progress === 100) {
+                    console.log('Processing complete!');
+                    clearInterval(progressInterval); // 停止輪詢
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching progress:', error);
+                clearInterval(progressInterval); // 停止輪詢
+            });
+    }, 1000); // 每秒輪詢一次
+}
 
 document.getElementById('cropButton').addEventListener('click', () => {
     const imageFileInput = document.getElementById('imageFile');
