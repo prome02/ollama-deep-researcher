@@ -3,6 +3,7 @@ import json
 
 def main(jsob: str) -> dict:
     try:
+        
         jsob_dict = json.loads(jsob)
         content = jsob_dict.get('content', [])
         narrations = []
