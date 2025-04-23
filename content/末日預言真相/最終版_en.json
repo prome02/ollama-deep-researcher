@@ -1,0 +1,139 @@
+{
+  "language": "en",
+  "introduction": "This episode begins with a prophecy from the Buddha and the discovery of a mysterious underground chamber. We explore whether human civilization is entering a cycle of cognitive and moral decline, and question whether the age of AI signals a gradual outsourcing of thought itself.",
+  "hashtag": [
+    "civilization cycles",
+    "Buddha's prophecy",
+    "AI cognition",
+    "human future",
+    "pyramid discovery",
+    "apocalyptic teachings",
+    "deep learning",
+    "mappo era",
+    "cognitive decay",
+    "prophetic insights"
+  ],
+  "prompt_style": "Philosophical Cinematic Symbolism",
+  "content": [
+    {
+      "No.": "01",
+      "caption": "The Prophecy of the End Times",
+      "UUID": "c2719bde17204e19",
+      "timestamp": "00:00",
+      "voice_actor": "Deep Explorer",
+      "Narration": "Over 2,500 years ago, on the banks of the Ganges in ancient India, the Buddha sat among forest trees, surrounded by disciples whose faces were heavy with concern. He knew his time to enter Nirvana was near. After a long silence, Ananda knelt three times and finally, the Buddha spoke: \"The Dharma will fade; the wicked will be as numerous as the sands of the sea, while the good will be but one or two.\" In that moment, his words became a prophecy—one that seems to echo across time, reaching us today. Was it a foresight of the future, or simply a profound understanding of human cycles? If you've followed our channel, you may remember our video on the mysterious underground structure discovered in 2025. Perhaps, that too was a kind of proof: human civilization has never progressed in a straight line.",
+      "speak_instructions": "Affect: Sacred and solemn. Tone: Slow, storytelling with quiet gravity. Emotion: Reverent, reflective. Pronunciation: Emphasize sacred terms like 'fades', 'good', with deliberate breath before quoting the prophecy. Pause: 0.5s after 'echo across time, reaching us today.'",
+      "prompt": "Egyptian pyramid underground chamber, mysterious hieroglyphics, dim lighting, ancient stone walls, archaeological discovery, mystical atmosphere, photorealistic, cinematic lighting"
+    },
+    {
+      "No.": "02",
+      "caption": "The Hypothesis of Civilizational Cycles",
+      "UUID": "a3b7c2d8e5f1g9h0",
+      "timestamp": "01:15",
+      "voice_actor": "Deep Explorer",
+      "Narration": "...",
+      "speak_instructions": "...",
+      "prompt": "Conceptual illustration of cyclical civilization pattern, ancient calendar systems, flood imagery from different cultures, rebirth symbolism, digital art style with historical elements"
+    },
+    {
+      "No.": "03",
+      "caption": "The Buddha's Prophecy of the Decline of the Dharma",
+      "UUID": "j4k6l8m2n5p7q9r0",
+      "timestamp": "02:45",
+      "voice_actor": "Deep Explorer",
+      "Narration": "...",
+      "speak_instructions": "...",
+      "prompt": "Ancient Buddhist scripture scroll, fading text, dark atmospheric lighting, symbolic imagery of moral decay, modern city silhouette in background, contrast between ancient wisdom and modern chaos"
+    },
+    {
+      "No.": "04",
+      "caption": "The Evolutionary Ladder of Human Civilization",
+      "UUID": "s3t5u7v9w2x4y6z8",
+      "timestamp": "04:30",
+      "voice_actor": "Deep Explorer",
+      "Narration": "...",
+      "speak_instructions": "...",
+      "prompt": "Timeline visualization of human civilization development, agricultural revolution, industrial revolution, internet age, and AI era, with symbolic representations of each stage, educational illustration style"
+    },
+    {
+      "No.": "05",
+      "caption": "Cognitive Outsourcing in the Age of AI",
+      "UUID": "a1b3c5d7e9f2g4h6",
+      "timestamp": "06:15",
+      "voice_actor": "Deep Explorer",
+      "Narration": "...",
+      "speak_instructions": "...",
+      "prompt": "Human silhouette with brain partially replaced by digital interface, AI thinking on behalf of humans, emotional brain highlighted in contrast to rational centers, conceptual medical illustration style with futuristic elements"
+    },
+    {
+      "No.": "06",
+      "caption": "The Rise of the Emotional Brain",
+      "UUID": "i1j3k5l7m9n2p4q6",
+      "timestamp": "08:00",
+      "voice_actor": "Deep Explorer",
+      "Narration": "...",
+      "speak_instructions": "...",
+      "prompt": "Split-screen showing person scrolling short videos versus reading book, brain scan highlighting pleasure centers, visualization of shortening attention spans, social media algorithms creating information bubbles, modern digital lifestyle illustration"
+    },
+    {
+      "No.": "07",
+      "caption": "A Modern Interpretation of the Buddha’s Prophecy",
+      "UUID": "r1s3t5u7v9w2x4y6",
+      "timestamp": "09:45",
+      "voice_actor": "Deep Explorer",
+      "Narration": "...",
+      "speak_instructions": "...",
+      "prompt": "Ancient Buddhist text overlaid on modern social scenes, split screen showing predicted scenarios and current reality, visual metaphors of moral decay, symbolic representation of emotion overriding reason, documentary style composition"
+    },
+    {
+      "No.": "08",
+      "caption": "Modern Signs of the Decline",
+      "UUID": "z1a3b5c7d9e2f4g6",
+      "timestamp": "11:30",
+      "voice_actor": "Deep Explorer",
+      "Narration": "...",
+      "speak_instructions": "...",
+      "prompt": "Montage of modern society symptoms: person surrounded by notification bubbles, polarized political debate, VR entertainment, simplified education materials, all connected by visual thread to ancient prophecy symbols, photojournalistic style"
+    },
+    {
+      "No.": "09",
+      "caption": "The Power of Swimming Against the Current",
+      "UUID": "h1i3j5k7l9m2n4p6",
+      "timestamp": "13:15",
+      "voice_actor": "Deep Explorer",
+      "Narration": "...",
+      "speak_instructions": "...",
+      "prompt": "Person meditating on mountaintop above chaotic digital world below, moonlight breaking through dark clouds, symbolic path of wisdom through technological chaos, digital detox visualization, hopeful yet challenging atmosphere"
+    },
+    {
+      "No.": "10",
+      "caption": "A Scientific Reading of Prophecy",
+      "UUID": "q1r3s5t7u9v2w4x6",
+      "timestamp": "15:00",
+      "voice_actor": "Deep Explorer",
+      "Narration": "...",
+      "speak_instructions": "...",
+      "prompt": "Scientific visualization of human cognitive evolution, timeline showing shifts from physical to mental outsourcing, brain scans showing emotional vs rational processing, split image showing prophesied future and potential alternative paths, academic illustration style"
+    },
+    {
+      "No.": "11",
+      "caption": "The Crossroads of Human Destiny",
+      "UUID": "y1z3a5b7c9d2e4f6",
+      "timestamp": "16:45",
+      "voice_actor": "Deep Explorer",
+      "Narration": "...",
+      "speak_instructions": "...",
+      "prompt": "Symbolic crossroads with two futures: one showing passive consumers surrounded by AI, another showing harmonious human-AI collaboration, decision point illuminated, individual making conscious choice, philosophical concept art style"
+    },
+    {
+      "No.": "12",
+      "caption": "Closing Reflections and Future Inquiry",
+      "UUID": "g1h3i5j7k9l2m4n6",
+      "timestamp": "18:30",
+      "voice_actor": "Deep Explorer",
+      "Narration": "...",
+      "speak_instructions": "...",
+      "prompt": "Panoramic view showing ancient structures transitioning to modern cityscape with AI elements, circular timeline connecting past prophecies to present conditions, viewer positioned at decision point, cinematic epic scale with intimate human element, golden hour lighting"
+    }
+  ]
+}

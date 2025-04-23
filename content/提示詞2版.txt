@@ -1,0 +1,65 @@
+請在每段腳本中適度嵌入懸念與提問，以激發觀眾好奇心與追看動機。懸念設計可包含未解謎團、矛盾現象、歷史斷層、未知科技、或神秘巧合。請使用引導式問題句型（如：「為什麼會出現這種現象？」「這是否意味著⋯？」）結尾段落。
+
+此外，請每 2 至 3 段加入一句與觀眾互動的語句，引導留言、提出觀點或建立情感連結，例如：「你怎麼看？留言告訴我們」「這個解釋你能接受嗎？」「你有更合理的說法嗎？」
+
+語氣可保持神秘、探索式、略帶懷疑，搭配適度停頓與反問語調，增強沉浸感與敘事張力。
+
+整理以下討論內容，撰寫一篇約 20 分鐘 YouTube 劇本旁白，使用 <language>，語氣略偏說故事、面向一般成年人。
+
+依 <structure> 架構撰寫，段落數不限，必要時輔以英文資料（超過50%），輔以繁中與簡中資料。主題：從吉薩地下結構、聖經與佛經、末世預言，推論文明週期性與現代 AI 認知演化之關聯。
+
+埋入懸念與反思提問，適度與觀眾互動，結尾引導「按讚、訂閱、期待下一集」。
+
+最終輸出為標準 JSON 格式 <format>，以 narration 為主，單段旁白限制 300 詞內。若相鄰段落語氣相近，可合併節點節省 token。
+
+語音提示請依 <語音製作提示樣本> 格式撰寫，音量介於 -6 至 -12 dBFS。AI 圖片與音樂提示詞格式詳見 <說明>，如缺失請主動詢問補全。
+
+
+<structure>
+- 開場回顧：吉薩金字塔地下結構發現與文明週期線索
+- 聖經與佛經：大洪水與《佛說法滅盡經》中的壽命變化與末日象徵
+- 世界各宗教末日預言比較：天啟四騎士、彌賽亞、伊斯蘭教
+- 埋下懸念：為何不同文明描述相似？是巧合，還是規律？
+- 當代轉折：從農業→工業→網路→AI，勞力→思考的遞進釋放
+- 認知演化：AI 外包思考，情緒主導、資訊碎片化導致社會道德退化
+- 《佛說法滅盡經》預言對應現況，道德解體與群體冷漠
+- 收斂觀點：預言不只是宗教寓言，而是認知模式演變的預視
+- 結語：末日是地獄景象，還是《瓦力》式被馴化的平靜？
+
+<語音製作提示樣本>
+Affect: Deep, commanding, slightly dramatic, with reverent Olde English flair.
+Tone: Noble, heroic, formal; evokes medieval knights and epic quests.
+Emotion: Mystery, anticipation, fate-driven seriousness.
+Pronunciation: Clear, deliberate; emphasize archaic words.
+Pause: Insert 0.5s pause after key phrases or narrative turns.
+
+<說明>
+曲風: cinematic ambient
+音色: analog synth, cello
+節奏設備: TR-808
+氛圍: eerie, mystical
+編曲: layered, rich texture
+節奏: 90 BPM
+
+<format>
+{
+  "language":"en",
+  "title":"文章標題",
+  "introduction":"youtube簡介",
+  "music":"整體配樂的AI生成音樂提示詞參考<說明>",
+  "content": [
+    {
+      "No.": "01",
+      "caption": "段落標題",
+      "UUID": "16碼唯一識別碼",
+      "timestamp": "00:00",
+      "voice_actor": "語音角色,非必要",
+      "Narration": "限300詞內的旁白",
+      "speak_instructions":"語音語氣提示，結尾停頓0.5秒，符合YouTube -14 LUFS 響度",
+      "prompt":"AI圖片提示詞，若無則請提示生成"
+    }
+  ],
+  "resource": ["資料來源1", "資料來源2"],
+  "note": "其他注意事項, 非必要。"
+}
+</format>

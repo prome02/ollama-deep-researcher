@@ -236,7 +236,7 @@ def process_audio_consistency(subdir, output_file):
 
         # Normalize audio
         normalize_cmd = [
-            'ffmpeg-normalize', output_file, "-o",normalized_file
+            'ffmpeg-normalize', f"\"{output_file}\"", "-o",f"\"{normalized_file}\""
         ]
         subprocess.run(normalize_cmd, check=True)
 
@@ -244,7 +244,7 @@ def process_audio_consistency(subdir, output_file):
         
         convert_cmd = [
         'ffmpeg',
-        '-i', normalized_file,
+        '-i', f"\"{normalized_file}\"",
         '-c:v', 'libx264',
         '-crf', '18',
         '-pix_fmt', 'yuv420p',
@@ -253,7 +253,7 @@ def process_audio_consistency(subdir, output_file):
         '-b:a', '192k',
         '-movflags', '+faststart',
         '-y',  # 覆蓋已存在文件
-        final_mp4
+        f"\"{final_mp4}\""
     ]
         subprocess.run(convert_cmd, check=True)
         subprocess.run(['rm', normalized_file])
@@ -338,20 +338,26 @@ def combine_media(folder_path, generate_final_video: bool = False, audio_consist
         
 if __name__ == "__main__":
     
-    test_videos = ["G:/ai_generate/The_Great_Underground_Discovery_Massive_Structures_Beneath_the_Giza_Pyramids/Academic_Controversy_Skepticism_and_Debate/output.mp4", 
-     "G:/ai_generate/The_Great_Underground_Discovery_Massive_Structures_Beneath_the_Giza_Pyramids/Background_The_Giza_Pyramid_Complex/output.mp4"]
-
-    folder_path = r"test_folder"  # 替換為實際的資料夾路徑
-    generate_final_video = False
-    audio_consistency = True
-
-    # 呼叫 combine_media 函數
-    results = combine_media(folder_path, generate_final_video=generate_final_video, audio_consistency=audio_consistency)
-
-    # 列印結果
-    for result in results:
-        print(result)
+    process_audio_consistency("F:/AI製作/The Lacerta File",
+        "title.mp4"
+    )
     
+    
+    ###
+    # test_videos = ["G:/ai_generate/The_Great_Underground_Discovery_Massive_Structures_Beneath_the_Giza_Pyramids/Academic_Controversy_Skepticism_and_Debate/output.mp4", 
+    #  "G:/ai_generate/The_Great_Underground_Discovery_Massive_Structures_Beneath_the_Giza_Pyramids/Background_The_Giza_Pyramid_Complex/output.mp4"]
+
+    # folder_path = r"test_folder"  # 替換為實際的資料夾路徑
+    # generate_final_video = False
+    # audio_consistency = True
+
+    # # 呼叫 combine_media 函數
+    # results = combine_media(folder_path, generate_final_video=generate_final_video, audio_consistency=audio_consistency)
+
+    # # 列印結果
+    # for result in results:
+    #     print(result)
+    ###
     # 測試不同的 pause 設定
     # test_concatenation(test_videos, "output_test1.mp4", pause_duration=2, fade_duration=0.5)
     # test_concatenation(test_videos, "output_test2.mp4", pause_duration=3, fade_duration=1)

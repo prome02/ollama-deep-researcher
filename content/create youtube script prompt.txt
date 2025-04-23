@@ -39,6 +39,8 @@ Pause: Pauses after important Olde English phrases such as "Lo!" or "Hark!" and 
   "language":"en",
   "title":"文章標題",
   "introduction":"youtube簡介",
+  "hashtag":"至多10個標籤關鍵詞",
+  "prompt_style":"整體影像風格",
   "music":"整體配樂的AI生成音樂提示詞參考<說明>",
   "content": [
     {
