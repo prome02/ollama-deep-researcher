@@ -10,10 +10,7 @@ from flask import Flask, json, jsonify, render_template, request
 from werkzeug.utils import secure_filename
 
 from combine_script import combine_media
-from utils import (
-    call_generate_and_save_images,
-    validate_format,
-)
+from utils import call_generate_and_save_images, generate_audio_file, validate_format
 
 app = Flask(__name__)
 
@@ -88,24 +85,19 @@ def save_mp3():
 
         # 發送 TTS 請求
         tts_url = "https://api.openai.com/v1/audio/speech"
-        api_key = os.getenv("OPENAI_API_KEY")
-        if not api_key:
-            logger.error("OPENAI_API_KEY not found in environment variables")
-            return jsonify({"error": "找不到 OPENAI_API_KEY，請確認 .env 檔"}), 500
+        # api_key = os.getenv("OPENAI_API_KEY")
+        # if not api_key:
+        #     logger.error("OPENAI_API_KEY not found in environment variables")
+        #     return jsonify({"error": "找不到 OPENAI_API_KEY，請確認 .env 檔"}), 500
 
-        headers = {
-            "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json"
-        }
-        logger.info("Sending TTS request to OpenAI API")
-        logger.info(json.dumps(jobj, indent=2, ensure_ascii=False))
-        tts_response = requests.post(tts_url, headers=headers, json=jobj)
-        tts_response.raise_for_status()
+        # Generate audio file
+        
+        audio_content = generate_audio_file(jobj, tts_url, logger)
 
         # 保存 MP3 檔案
         os.makedirs(save_dir, exist_ok=True)
         with open(filename, "wb") as f:
-            f.write(tts_response.content)
+            f.write(audio_content)
         logger.info(f"MP3 file saved successfully at {filename}")
         return jsonify({
             "status": "success",

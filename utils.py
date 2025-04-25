@@ -7,6 +7,8 @@ This module provides:
 """
 
 import os
+import json
+import requests
 from io import BytesIO
 
 import ffmpeg
@@ -125,6 +127,31 @@ def rename_output_files_by_creation_time(folder_path):  # noqa: D103
             print(f"Renamed {output_file_path} to {new_file_path}")
 
 
+def generate_audio_file(jobj, tts_url, logger= None):
+    """Call OpenAI API to generate an audio file."""
+    try:
+        api_key = os.getenv("OPENAI_API_KEY")
+        if not api_key:
+            logger.error("OPENAI_API_KEY not found in environment variables")
+            raise ValueError("OPENAI_API_KEY not found in environment variables")
+        
+        headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json"
+        }
+        
+        if logger :
+            logger.info("Sending TTS request to OpenAI API")
+            logger.info(json.dumps(jobj, indent=2, ensure_ascii=False))
+        tts_response = requests.post(tts_url, headers=headers, json=jobj)
+        tts_response.raise_for_status()
+        return tts_response.content
+    except requests.exceptions.RequestException as e:
+        if logger :
+            logger.error(f"TTS request failed: {str(e)}")
+        raise
+
+
 if __name__ == "__main__":
 
     # 迭代指定資料夾下的所有子資料夾
@@ -148,4 +175,19 @@ if __name__ == "__main__":
     #                 print(f"Failed to generate video for {subdir}")
 
     # Rename output files by creation time
-    rename_output_files_by_creation_time(folder_path)
+    # rename_output_files_by_creation_time(folder_path)
+    tts_payload = {
+                "model": "gpt-4o-mini-tts",
+                "voice": "onyx",
+                "input": "If you’ve seen my other video on the latest findings beneath the Giza Plateau, you’ll know this: in March 2025, a team of Italian and British researchers shook the academic world with their discovery. Using advanced radar, they detected unusual subterranean structures lying 1.2 kilometers deep and stretching across nearly 2 kilometers of terrain beneath the pyramids. Among the findings were vertical shafts and spiraling corridors—features reminiscent of the mythical Hall of Amenti from ancient Egyptian lore, where souls faced judgment. While these structures haven’t been physically excavated yet, and their age and purpose remain uncertain, the possibility is tantalizing: could these be messages deliberately left by an earlier civilization—for us?",
+                "instructions":"Affect: Reflective and analytical. Tone: Narrative with philosophical undertone. Emotion: Thoughtful concern and curiosity. Pronunciation: Emphasize key cultural or philosophical terms. Pause: Insert 0.5s pause at the end of each segment to allow reflection and smooth transition."
+            }
+    tts_url = "https://api.openai.com/v1/audio/speech"
+    
+    #surrond try  catch
+    try:
+        audio_content = generate_audio_file(jobj= tts_payload, tts_url=tts_url)
+        with open(r"G:\ai_generate\The_Truth_Behind_Doomsday_Prophecies_From_Ancient_Wisdom_to_the_Age_of_AI\03Underground_Chambers_and_Ancient_Warnings\03If_youve_seen_my_other_video_on_the_latest_findin.mp3", "wb") as f:
+            f.write(audio_content)
+    except Exception as e:
+        print(f"Error: {e}")  # noqa: T201

@@ -232,11 +232,12 @@ def process_audio_consistency(subdir, output_file):
             return True
         # normalized_dir = os.path.join(subdir, 'normalized')
         # os.makedirs(normalized_dir, exist_ok=True)
+        print(f"current dir: {os.getcwd()}")
         normalized_file =  f"{subdir}/output.mkv"
 
         # Normalize audio
         normalize_cmd = [
-            'ffmpeg-normalize', f"\"{output_file}\"", "-o",f"\"{normalized_file}\""
+            'ffmpeg-normalize', f"{output_file}", "-o",f"{normalized_file}"
         ]
         subprocess.run(normalize_cmd, check=True)
 
@@ -244,7 +245,7 @@ def process_audio_consistency(subdir, output_file):
         
         convert_cmd = [
         'ffmpeg',
-        '-i', f"\"{normalized_file}\"",
+        '-i', f"{normalized_file}",
         '-c:v', 'libx264',
         '-crf', '18',
         '-pix_fmt', 'yuv420p',
@@ -253,7 +254,7 @@ def process_audio_consistency(subdir, output_file):
         '-b:a', '192k',
         '-movflags', '+faststart',
         '-y',  # 覆蓋已存在文件
-        f"\"{final_mp4}\""
+        f"{final_mp4}"
     ]
         subprocess.run(convert_cmd, check=True)
         subprocess.run(['rm', normalized_file])
@@ -338,20 +339,20 @@ def combine_media(folder_path, generate_final_video: bool = False, audio_consist
         
 if __name__ == "__main__":
     
-    process_audio_consistency("F:/AI製作/The Lacerta File",
-        "title.mp4"
-    )
+    # process_audio_consistency("F:/AI製作/The Lacerta File",
+    #     "title.mp4"
+    # )
     
     
     ###
     # test_videos = ["G:/ai_generate/The_Great_Underground_Discovery_Massive_Structures_Beneath_the_Giza_Pyramids/Academic_Controversy_Skepticism_and_Debate/output.mp4", 
     #  "G:/ai_generate/The_Great_Underground_Discovery_Massive_Structures_Beneath_the_Giza_Pyramids/Background_The_Giza_Pyramid_Complex/output.mp4"]
 
-    # folder_path = r"test_folder"  # 替換為實際的資料夾路徑
-    # generate_final_video = False
-    # audio_consistency = True
+    folder_path = r"G:\ai_generate\The_Truth_Behind_Doomsday_Prophecies_From_Ancient_Wisdom_to_the_Age_of_AI"  # 替換為實際的資料夾路徑
+    generate_final_video = False
+    audio_consistency = True
 
-    # # 呼叫 combine_media 函數
+    # 呼叫 combine_media 函數
     # results = combine_media(folder_path, generate_final_video=generate_final_video, audio_consistency=audio_consistency)
 
     # # 列印結果
@@ -372,4 +373,15 @@ if __name__ == "__main__":
 #     }
 # )
 
-
+    output_file= r"G:\ai_generate\The_Truth_Behind_Doomsday_Prophecies_From_Ancient_Wisdom_to_the_Age_of_AI\03Underground_Chambers_and_Ancient_Warnings\03Underground_Chambers_and_Ancient_Warnings.mp4"
+    
+    # merge_media_files(
+    #     image_path= r"G:\ai_generate\The_Truth_Behind_Doomsday_Prophecies_From_Ancient_Wisdom_to_the_Age_of_AI\03Underground_Chambers_and_Ancient_Warnings\Egyptian_pyramid_underground_chamber_mysterious_h.png",
+    #     audio_path= r"G:\ai_generate\The_Truth_Behind_Doomsday_Prophecies_From_Ancient_Wisdom_to_the_Age_of_AI\03Underground_Chambers_and_Ancient_Warnings\03If_youve_seen_my_other_video_on_the_latest_findin.mp3",
+    #     output_path=  output_file
+    # )
+    
+    process_audio_consistency(
+        subdir= r"G:\ai_generate\The_Truth_Behind_Doomsday_Prophecies_From_Ancient_Wisdom_to_the_Age_of_AI\03Underground_Chambers_and_Ancient_Warnings",
+        output_file= output_file
+    )
