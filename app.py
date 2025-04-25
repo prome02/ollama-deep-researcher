@@ -167,20 +167,25 @@ def upload_json():
         os.makedirs(da_dir, exist_ok=True)
         logger.debug(f"Created directory: {da_dir}")
 
-        if 'mp3_modes' in data:
-            mp3_modes = data['mp3_modes']
+
+        content = data.get('content', [])
+        mp3_modes = request.form.get('mp3_modes')
+        if mp3_modes:
+            mp3_modes = json.loads(mp3_modes)  # 將 JSON 字串轉換為 Python 列表
         else:
-            mp3_modes = [True] * len(data.get('content', []))
+            mp3_modes = [True] * len(content)  # 預設為全 True
 
         # Extract relevant data from the Response objects before appending to results
         results = []
-        for i, item in enumerate(data.get("content", [])):
+        for i, item in enumerate(content):
             if not mp3_modes[i]:
                 continue
 
-            continue
+            
         
             caption = item.get("caption")
+            # print(f"Caption: {caption}")
+            # continue
             if not caption:
                 logger.error("Caption is missing or invalid in one of the content items")
                 return jsonify({"error": "Caption is missing or invalid"}), 400

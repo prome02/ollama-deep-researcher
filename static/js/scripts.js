@@ -50,31 +50,34 @@ document.getElementById('readMp3StatusButton').addEventListener('click', async (
         try {
             const jsonData = JSON.parse(event.target.result);
             const contentArray = jsonData['content'];
-            const nameList = contentArray.map(item => `${item['No']}${item['caption']}`);
+            const nameList = contentArray.map(item => `${item['No.']} ${item['caption']}`);
 
             const nameListContainer = document.getElementById('nameListContainer');
             nameListContainer.innerHTML = '';
 
             nameList.forEach((name, index) => {
-                const row = document.createElement('div');
-                row.className = 'row mb-2';
-
-                const checkboxCol = document.createElement('div');
-                checkboxCol.className = 'col';
+                // 創建容器元素 (推薦使用 div 或 li)
+                const container = document.createElement('div');
+                container.className = 'checkbox-container'; // 用於後續CSS排版
+                
+                // 創建 checkbox
                 const checkbox = document.createElement('input');
                 checkbox.type = 'checkbox';
+                checkbox.id = `item-${index}`; // 必須有唯一ID供label關聯
                 checkbox.className = 'item-checkbox';
                 checkbox.dataset.index = index;
-                checkboxCol.appendChild(checkbox);
-
-                const nameCol = document.createElement('div');
-                nameCol.className = 'col';
-                nameCol.textContent = name;
-
-                row.appendChild(checkboxCol);
-                row.appendChild(nameCol);
-                nameListContainer.appendChild(row);
+            
+                // 創建 label 並關聯 checkbox
+                const label = document.createElement('label');
+                label.htmlFor = `item-${index}`; // 與checkbox的id匹配
+                label.textContent = name; // 顯示文字內容
+                
+                // 組合元素
+                container.appendChild(checkbox);
+                container.appendChild(label);
+                nameListContainer.appendChild(container);
             });
+            
 
             const chkAll = document.getElementById('chk_all');
             chkAll.checked = false;
@@ -104,6 +107,7 @@ document.getElementById('runButton').addEventListener('click', async () => {
     formData.append('jsonFile', fileInput.files[0]);
 
     const mp3Modes = Array.from(document.querySelectorAll('.item-checkbox')).map(checkbox => checkbox.checked);
+    console.log('mp3Modes:', mp3Modes); // Print mp3Modes to console
     formData.append('mp3_modes', JSON.stringify(mp3Modes));
 
     const response = await fetch('/upload-json', {
