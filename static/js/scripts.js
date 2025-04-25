@@ -26,6 +26,101 @@ document.getElementById('uploadJsonButton').addEventListener('click', async (e) 
     }
 });
 
+function closeMp3Dialog() {
+    document.getElementById('mp3Dialog').style.display = 'none';
+    document.getElementById('dialogOverlay').style.display = 'none';
+}
+
+function openMp3Dialog() {
+    document.getElementById('mp3Dialog').style.display = 'block';
+    document.getElementById('dialogOverlay').style.display = 'block';
+}
+
+document.getElementById('readMp3StatusButton').addEventListener('click', async () => {
+    const fileInput = document.getElementById('jsonFile');
+    if (!fileInput.files.length) {
+        alert('Please select a JSON file first.');
+        return;
+    }
+
+    const file = fileInput.files[0];
+    const reader = new FileReader();
+
+    reader.onload = async (event) => {
+        try {
+            const jsonData = JSON.parse(event.target.result);
+            const contentArray = jsonData['content'];
+            const nameList = contentArray.map(item => `${item['No']}${item['caption']}`);
+
+            const nameListContainer = document.getElementById('nameListContainer');
+            nameListContainer.innerHTML = '';
+
+            nameList.forEach((name, index) => {
+                const row = document.createElement('div');
+                row.className = 'row mb-2';
+
+                const checkboxCol = document.createElement('div');
+                checkboxCol.className = 'col';
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.className = 'item-checkbox';
+                checkbox.dataset.index = index;
+                checkboxCol.appendChild(checkbox);
+
+                const nameCol = document.createElement('div');
+                nameCol.className = 'col';
+                nameCol.textContent = name;
+
+                row.appendChild(checkboxCol);
+                row.appendChild(nameCol);
+                nameListContainer.appendChild(row);
+            });
+
+            const chkAll = document.getElementById('chk_all');
+            chkAll.checked = false;
+            chkAll.addEventListener('change', () => {
+                document.querySelectorAll('.item-checkbox').forEach(checkbox => {
+                    checkbox.checked = chkAll.checked;
+                });
+            });
+
+            openMp3Dialog();
+        } catch (error) {
+            alert('Invalid JSON file.');
+        }
+    };
+
+    reader.readAsText(file);
+});
+
+document.getElementById('runButton').addEventListener('click', async () => {
+    const fileInput = document.getElementById('jsonFile');
+    if (!fileInput.files.length) {
+        alert('Please select a JSON file first.');
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('jsonFile', fileInput.files[0]);
+
+    const mp3Modes = Array.from(document.querySelectorAll('.item-checkbox')).map(checkbox => checkbox.checked);
+    formData.append('mp3_modes', JSON.stringify(mp3Modes));
+
+    const response = await fetch('/upload-json', {
+        method: 'POST',
+        body: formData
+    });
+
+    const result = await response.json();
+    if (response.ok) {
+        alert('Processing completed successfully.');
+    } else {
+        alert(`Error: ${result.error}`);
+    }
+
+    closeMp3Dialog();
+});
+
 function submitFolderPath() {
     const folderPath = document.getElementById('folderPath').value;
     const generateFinalVideo = document.getElementById('generateFinalVideo').checked;

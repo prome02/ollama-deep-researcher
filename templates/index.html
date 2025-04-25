@@ -5,6 +5,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Upload JSON</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <style>
+        #mp3Dialog {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: none;
+            width: 80%;
+            max-width: 600px;
+            padding: 20px;
+        }
+
+        #dialogOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            display: none;
+        }
+    </style>
 </head>
 <body class="bg-light">
     <div class="container py-5">
@@ -17,6 +44,7 @@
                             <label for="jsonFile" class="form-label">Upload JSON File:</label>
                             <input type="file" id="jsonFile" name="jsonFile" class="form-control" accept=".json" required>
                             <button type="button" id="uploadJsonButton" class="btn btn-primary mt-2">Upload JSON</button>
+                            <button type="button" id="readMp3StatusButton" class="btn btn-secondary mt-2">讀取mp3檔案現況</button>
                         </div>
                         <div class="mb-3">
                             <label for="folderPath" class="form-label mt-4">Select Folder:</label>
@@ -55,6 +83,32 @@
                         <div class="progress-bar" id="progressBar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Progress"></div>
                     </div>
                     <div id="result" class="mt-4"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="dialogOverlay" onclick="closeMp3Dialog()"></div>
+    <div id="mp3Dialog" class="modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">MP3 檔案現況</h5>
+                    <button type="button" class="close" aria-label="Close" onclick="closeMp3Dialog()">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row mb-3">
+                        <div class="col">
+                            <input type="checkbox" id="chk_all"> 全選
+                        </div>
+                        <div class="col">
+                            <button type="button" id="runButton" class="btn btn-primary">Run</button>
+                        </div>
+                    </div>
+                    <div id="nameListContainer">
+                        <!-- Rows for name list will be dynamically added here -->
+                    </div>
                 </div>
             </div>
         </div>

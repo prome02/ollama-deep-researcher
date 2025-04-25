@@ -167,9 +167,19 @@ def upload_json():
         os.makedirs(da_dir, exist_ok=True)
         logger.debug(f"Created directory: {da_dir}")
 
+        if 'mp3_modes' in data:
+            mp3_modes = data['mp3_modes']
+        else:
+            mp3_modes = [True] * len(data.get('content', []))
+
         # Extract relevant data from the Response objects before appending to results
         results = []
-        for item in data.get("content", []):
+        for i, item in enumerate(data.get("content", [])):
+            if not mp3_modes[i]:
+                continue
+
+            continue
+        
             caption = item.get("caption")
             if not caption:
                 logger.error("Caption is missing or invalid in one of the content items")
