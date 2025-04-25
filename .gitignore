@@ -16,3 +16,4 @@ test.py
 list.txt
 info.txt
 test_folder/*
+.langgraph_api/*
