@@ -373,15 +373,15 @@ if __name__ == "__main__":
 #     }
 # )
 
-    output_file= r"G:\ai_generate\The_Truth_Behind_Doomsday_Prophecies_From_Ancient_Wisdom_to_the_Age_of_AI\03Underground_Chambers_and_Ancient_Warnings\03Underground_Chambers_and_Ancient_Warnings.mp4"
+    output_file= r"G:\ai_generate\The_Truth_Behind_Doomsday_Prophecies_From_Ancient_Wisdom_to_the_Age_of_AI\08Signs_of_the_Dharmas_Decline_in_Modern_Life\08Signs_of_the_.mp4"
     
-    # merge_media_files(
-    #     image_path= r"G:\ai_generate\The_Truth_Behind_Doomsday_Prophecies_From_Ancient_Wisdom_to_the_Age_of_AI\03Underground_Chambers_and_Ancient_Warnings\Egyptian_pyramid_underground_chamber_mysterious_h.png",
-    #     audio_path= r"G:\ai_generate\The_Truth_Behind_Doomsday_Prophecies_From_Ancient_Wisdom_to_the_Age_of_AI\03Underground_Chambers_and_Ancient_Warnings\03If_youve_seen_my_other_video_on_the_latest_findin.mp3",
-    #     output_path=  output_file
-    # )
-    
-    process_audio_consistency(
-        subdir= r"G:\ai_generate\The_Truth_Behind_Doomsday_Prophecies_From_Ancient_Wisdom_to_the_Age_of_AI\03Underground_Chambers_and_Ancient_Warnings",
-        output_file= output_file
+    merge_media_files(
+        image_path= r"G:\ai_generate\The_Truth_Behind_Doomsday_Prophecies_From_Ancient_Wisdom_to_the_Age_of_AI\08Signs_of_the_Dharmas_Decline_in_Modern_Life\ChatGPT Image 2025年4月25日 下午08_40_04.png",
+        audio_path= r"G:\ai_generate\The_Truth_Behind_Doomsday_Prophecies_From_Ancient_Wisdom_to_the_Age_of_AI\08Signs_of_the_Dharmas_Decline_in_Modern_Life\08Look_aroundare_the_signs_of_the_Dharmas_decline.mp3",
+        output_path=  output_file
     )
+    
+    # process_audio_consistency(
+    #     subdir= r"G:\ai_generate\The_Truth_Behind_Doomsday_Prophecies_From_Ancient_Wisdom_to_the_Age_of_AI\03Underground_Chambers_and_Ancient_Warnings",
+    #     output_file= output_file
+    # )
